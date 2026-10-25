@@ -92,16 +92,20 @@ function transitionColorMode(commit: () => void, origin?: ColorModeOrigin) {
   const radius = revealRadius({ x, y }, viewport);
   root.style.setProperty("--sw-reveal-x", `${x}px`);
   root.style.setProperty("--sw-reveal-y", `${y}px`);
-  // The new mode is a live image: without this, every control with a colour
-  // transition fades from light to dark inside the circle, so it reads as a
-  // muddy flicker instead of one clean edge (found with the reveal probe).
-  root.classList.add(plan === "reveal-soft" ? "sw-theme-reveal-soft" : "sw-theme-reveal", "sw-theme-switching");
+  root.classList.add(plan === "reveal-soft" ? "sw-theme-reveal-soft" : "sw-theme-reveal");
   const cleanUp = () => {
     root.classList.remove("sw-theme-reveal", "sw-theme-reveal-soft", "sw-theme-switching");
     root.style.removeProperty("--sw-reveal-x");
     root.style.removeProperty("--sw-reveal-y");
   };
-  const transition = doc.startViewTransition(commit);
+  const transition = doc.startViewTransition(() => {
+    // The new mode is a live image: without this, every control with a colour
+    // transition fades from light to dark inside the circle, so it reads as a
+    // muddy flicker instead of one clean edge (found with the reveal probe).
+    // Added in the update, after the old mode was captured as it was.
+    root.classList.add("sw-theme-switching");
+    commit();
+  });
   // Hold the final frame: without fill the mask snaps back to 0 for a frame
   // before the transition tears down, flashing the old mode.
   const timing: KeyframeAnimationOptions = { duration: REVEAL_DURATION_MS, easing: REVEAL_EASING, fill: "forwards", pseudoElement: "::view-transition-new(root)" };
