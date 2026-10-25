@@ -4,11 +4,9 @@ import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const STORAGE_PREFIX = "swi:dash:";
-
-function readSaved(id: string): boolean | null {
+function readSaved(key: string): boolean | null {
   try {
-    const saved = window.localStorage.getItem(STORAGE_PREFIX + id);
+    const saved = window.localStorage.getItem(key);
     return saved === "open" ? true : saved === "closed" ? false : null;
   } catch {
     return null;
@@ -20,12 +18,27 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener("storage", onChange);
 }
 
-function save(id: string, open: boolean) {
+function save(key: string, open: boolean) {
   try {
-    window.localStorage.setItem(STORAGE_PREFIX + id, open ? "open" : "closed");
+    window.localStorage.setItem(key, open ? "open" : "closed");
   } catch {
     // Private windows and blocked storage just forget the choice.
   }
+}
+
+/**
+ * Open/closed state remembered in this browser under `storageKey`. The server
+ * and the first client render use `defaultOpen`; the saved choice applies
+ * after hydration.
+ */
+export function useRememberedOpen(storageKey: string, defaultOpen: boolean): [boolean, () => void] {
+  const saved = useSyncExternalStore(subscribe, () => readSaved(storageKey), () => null);
+  const [choice, setChoice] = useState<boolean | null>(null);
+  const open = choice ?? saved ?? defaultOpen;
+  return [open, () => {
+    save(storageKey, !open);
+    setChoice(!open);
+  }];
 }
 
 /**
@@ -43,16 +56,8 @@ export function CollapsibleCard({
   titleAs?: "h2" | "h3";
   children: ReactNode;
 }) {
-  // The server and the first client render use defaultOpen; the saved choice applies after hydration.
-  const saved = useSyncExternalStore(subscribe, () => readSaved(id), () => null);
-  const [choice, setChoice] = useState<boolean | null>(null);
-  const open = choice ?? saved ?? defaultOpen;
+  const [open, toggle] = useRememberedOpen(`swi:dash:${id}`, defaultOpen);
   const bodyId = useId();
-
-  function toggle() {
-    save(id, !open);
-    setChoice(!open);
-  }
 
   return (
     <section className="min-w-0 rounded-xl border border-line bg-panel">

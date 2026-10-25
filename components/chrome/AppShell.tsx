@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Bell, ChevronsUpDown, LogOut, Menu as MenuIcon, Moon, Sun, X } from "lucide-react";
+import { Bell, ChevronDown, ChevronsUpDown, LogOut, Menu as MenuIcon, Moon, Sun, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { ShellData } from "@/lib/appShell";
 import { activeNavKey } from "@/lib/nav";
@@ -14,6 +14,7 @@ import { SpaceWorksLogo } from "@/components/brand/SpaceWorksLogo";
 import { useAppColorMode } from "@/components/providers";
 import { Avatar } from "@/components/ui/display";
 import { IconButton } from "@/components/ui/button";
+import { useRememberedOpen } from "@/components/ui/collapsible";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 
 function NavLink({ href, active, children, onNavigate }: { href: string; active: boolean; children: string; onNavigate?: () => void }) {
@@ -130,6 +131,29 @@ function NotificationsLink({ data, onNavigate }: { data: ShellData; onNavigate?:
   );
 }
 
+/** A labelled sidebar group that folds; the group holding the current page always shows it. */
+function NavGroup({ id, label, holdsActive, children }: { id: string; label: string; holdsActive: boolean; children: ReactNode }) {
+  const [saved, toggle] = useRememberedOpen(`swi:nav:${id}`, true);
+  const open = saved || holdsActive;
+  const listId = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={holdsActive}
+        aria-expanded={open}
+        aria-controls={listId}
+        className="flex min-h-9 items-center justify-between gap-2 rounded-md px-3 text-left text-overline text-ink-muted transition-colors hover:bg-sidebar-hover hover:text-ink disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-ink-muted"
+      >
+        {label}
+        <ChevronDown aria-hidden className={cn("size-3.5 shrink-0 transition-transform duration-[160ms] motion-reduce:transition-none", !open && "-rotate-90")} />
+      </button>
+      <div id={listId} hidden={!open} className="flex flex-col gap-1">{children}</div>
+    </div>
+  );
+}
+
 function SidebarContents({ data, onNavigate, headerAction }: { data: ShellData; onNavigate?: () => void; headerAction?: ReactNode }) {
   const pathname = usePathname() ?? "";
   const active = activeNavKey(data.nav, pathname);
@@ -145,16 +169,20 @@ function SidebarContents({ data, onNavigate, headerAction }: { data: ShellData; 
         {headerAction ?? <NotificationsLink data={data} onNavigate={onNavigate} />}
       </div>
       <nav aria-label="Space" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        {data.nav.map((group) => (
-          <div key={group.key} className="flex flex-col gap-1">
-            {group.label ? <p className="px-3 pb-0.5 text-overline text-ink-muted">{group.label}</p> : null}
-            {group.items.map((item) => (
-              <NavLink key={item.key} href={item.href} active={active === item.key} onNavigate={onNavigate}>
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        ))}
+        {data.nav.map((group) => {
+          const links = group.items.map((item) => (
+            <NavLink key={item.key} href={item.href} active={active === item.key} onNavigate={onNavigate}>
+              {item.label}
+            </NavLink>
+          ));
+          return group.label ? (
+            <NavGroup key={group.key} id={group.key} label={group.label} holdsActive={group.items.some((item) => item.key === active)}>
+              {links}
+            </NavGroup>
+          ) : (
+            <div key={group.key} className="flex flex-col gap-1">{links}</div>
+          );
+        })}
       </nav>
       <div className="mt-auto pt-2">
         <AccountMenu data={data} onNavigate={onNavigate} />
