@@ -115,6 +115,12 @@ only from [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/
    the space name is a bell icon in the same ink colour (it was the word
    "Inbox"); the unread count still sits beside it and the link keeps its
    "Notifications, N unread" name.
+13. **Collapsible everywhere it reduces clutter** (2026-10-25). Secondary or
+   empty sections on busy pages fold (CollapsibleCard for cards,
+   CollapsibleSection for headed tables), keyed by the kind of section so a
+   choice applies on every page that shows it; the primary content and
+   forms in progress stay open. Long tables cap their height and keep a
+   sticky header.
 
 ## Defaults the owner may revisit
 

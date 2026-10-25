@@ -81,7 +81,7 @@ export function PurchasesTable({ slug, currency, rows, manage, locations, suppli
 
   return (
     <>
-      <Table label="Buy list">
+      <Table long label="Buy list">
         <THead>
           <tr>
             <TH>Purchase</TH>

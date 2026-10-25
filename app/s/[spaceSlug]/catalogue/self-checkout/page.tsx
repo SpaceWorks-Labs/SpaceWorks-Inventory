@@ -24,7 +24,7 @@ export default async function SelfCheckoutPage({ params }: PageProps<"/s/[spaceS
 
   return (
     <DetailLayout
-      back={{ href: `/s/${slug}/catalogue`, label: "Back to the catalogue" }}
+      back={{ href: `/s/${slug}/catalogue`, label: "Catalogue" }}
       header={<PageHeader title="Self-checkout" description="Borrow items marked for self-checkout without waiting for the desk. Staff see what you took." />}
     >
       {off ? (

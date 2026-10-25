@@ -19,7 +19,7 @@ function sideEffects(row: MovementView) {
 /** The append-only stock ledger: newest first, signed changes, who and why. */
 export function MovementsTable({ slug, rows, showItem = true }: { slug: string; rows: MovementView[]; showItem?: boolean }) {
   return (
-    <Table label="Stock movements">
+    <Table long label="Stock movements">
       <THead>
         <tr>
           <TH>When</TH>

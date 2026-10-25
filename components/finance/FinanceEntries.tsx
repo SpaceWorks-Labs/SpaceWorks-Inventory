@@ -5,7 +5,8 @@ import Link from "next/link";
 import { reverseFinanceEntryAction } from "@/app/actions/finance";
 import { useActionRunner } from "@/components/desk/useActionRunner";
 import { Button } from "@/components/ui/button";
-import { Callout, Chip, EmptyState, SectionHeading } from "@/components/ui/display";
+import { CollapsibleSection } from "@/components/ui/collapsible";
+import { Callout, Chip, EmptyState } from "@/components/ui/display";
 import { Field, Input } from "@/components/ui/field";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import type { FinanceReport } from "@/lib/finance/report";
@@ -18,11 +19,10 @@ export function FinanceEntries({ slug, currency, entries }: { slug: string; curr
   const [reason, setReason] = useState("");
   const { run, pending, error } = useActionRunner();
   return (
-    <section className="space-y-3">
-      <SectionHeading title="Entries" description="Up to 500 of the latest entries in the period. Every entry is in the download." as="h3" />
+    <CollapsibleSection id="finance-entries" title="Entries" titleAs="h3" count={entries.length} description="Up to 500 of the latest entries in the period. Every entry is in the download.">
       {error ? <Callout tone="danger" role="alert">{error}</Callout> : null}
       {entries.length === 0 ? <EmptyState title="No money moved in this period." /> : (
-        <Table label="Ledger entries">
+        <Table long label="Ledger entries">
           <THead>
             <tr><TH>Date</TH><TH>Entry</TH><TH>Method</TH><TH className="text-right">Amount</TH><TH><span className="sr-only">Actions</span></TH></tr>
           </THead>
@@ -53,6 +53,6 @@ export function FinanceEntries({ slug, currency, entries }: { slug: string; curr
           </TBody>
         </Table>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }

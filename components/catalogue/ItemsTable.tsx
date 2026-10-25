@@ -14,7 +14,7 @@ const qty = (value: number, unit: string | null) => `${value.toLocaleString("en-
 /** The catalogue with stock in every state and its value at average cost. */
 export function ItemsTable({ slug, rows }: { slug: string; rows: ItemListRow[] }) {
   return (
-    <Table label="Items">
+    <Table long label="Items">
       <THead>
         <tr>
           <TH>Item</TH>

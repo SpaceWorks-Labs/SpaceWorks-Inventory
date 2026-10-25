@@ -6,7 +6,8 @@ import { changeAssetStateAction } from "@/app/actions/stock";
 import { useRunAction } from "@/components/catalogue/useRunAction";
 import { CONDITION_LABEL } from "@/components/catalogue/words";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, EmptyState } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { EmptyState } from "@/components/ui/display";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { ResolveRepairDialog } from "./RepairDialogs";
@@ -24,8 +25,7 @@ export function RepairShelf({ slug, levels, assets, canAct }: { slug: string; le
   return (
     <div className="flex flex-col gap-6">
       {levels.length > 0 ? (
-        <Card>
-          <CardHeader title="Parts and tools by quantity" />
+        <CollapsibleCard id="repair-shelf-quantity" title="Parts and tools by quantity" count={levels.length}>
           <Table label="Units under repair by location">
             <THead><tr><TH>Item</TH><TH>Location</TH><TH className="text-right">Under repair</TH>{canAct ? <TH><span className="sr-only">Actions</span></TH> : null}</tr></THead>
             <TBody>
@@ -44,11 +44,10 @@ export function RepairShelf({ slug, levels, assets, canAct }: { slug: string; le
               ))}
             </TBody>
           </Table>
-        </Card>
+        </CollapsibleCard>
       ) : null}
       {assets.length > 0 ? (
-        <Card>
-          <CardHeader title="Serialized units" />
+        <CollapsibleCard id="repair-shelf-assets" title="Serialized units" count={assets.length}>
           <Table label="Assets under repair">
             <THead><tr><TH>Asset tag</TH><TH>Item</TH><TH>Location</TH><TH>Condition</TH>{canAct ? <TH><span className="sr-only">Actions</span></TH> : null}</tr></THead>
             <TBody>
@@ -68,7 +67,7 @@ export function RepairShelf({ slug, levels, assets, canAct }: { slug: string; le
               ))}
             </TBody>
           </Table>
-        </Card>
+        </CollapsibleCard>
       ) : null}
       {resolving ? (
         <ResolveRepairDialog

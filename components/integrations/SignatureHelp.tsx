@@ -1,4 +1,5 @@
-import { Card, CardHeader, DetailList } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { DetailList } from "@/components/ui/display";
 
 const SNIPPET = `import crypto from "node:crypto";
 
@@ -16,8 +17,7 @@ function verify(secret, rawBody, header) {
 /** How receivers check that an event really came from this space. */
 export function SignatureHelp() {
   return (
-    <Card as="section" aria-labelledby="signatures-heading">
-      <CardHeader title={<span id="signatures-heading">Verifying signatures</span>} description="Every event is a POST with a JSON body and these headers. Check the signature before trusting the body." />
+    <CollapsibleCard id="webhook-signatures" title="Verifying signatures" defaultOpen={false} description="Every event is a POST with a JSON body and these headers. Check the signature before trusting the body.">
       <DetailList
         items={[
           { label: "X-SpaceWorks-Signature", value: <><span className="code-text">t=&lt;unix seconds&gt;,v1=&lt;hex&gt;</span>, where v1 is the HMAC-SHA256 of “t.raw body” using the signing secret.</> },
@@ -27,6 +27,6 @@ export function SignatureHelp() {
       />
       <p className="mt-4 text-body-ui text-ink-secondary">Reject events whose timestamp is more than five minutes old. Answer with any 2xx status within ten seconds; anything else is retried with growing gaps, and a webhook that keeps failing is switched off.</p>
       <pre className="code-text mt-4 overflow-x-auto rounded-lg bg-inverse p-4 text-sm text-on-inverse"><code>{SNIPPET}</code></pre>
-    </Card>
+    </CollapsibleCard>
   );
 }

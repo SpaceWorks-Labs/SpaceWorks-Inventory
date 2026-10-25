@@ -72,6 +72,13 @@ The first public release: everything since the split from SpaceWorks
   collapsed, show their count and remember this browser's choice.
 - The notifications link beside the space name is a bell icon instead of
   the word "Inbox".
+- Secondary sections fold on every busy page and remember the choice: item,
+  asset, loan, transfer and repair details, the timeline and evidence,
+  report and finance tables, integrations, members' invitations, count
+  schedules, the repair shelf and the account page. Long lists (items,
+  assets, loans, stock movements, members, the buy list, repairs and the
+  ledger) scroll inside their box with the header row kept in view.
+- Back links and the location tree use icons instead of arrow characters.
 - **Roles: Inventory manager, Staff and Member, plus Technician** (repairs
   only, with an authenticator app). The admin and owner roles are gone; the inventory manager runs the whole space, including
   members, other managers and deleting the space. The space's creator is its

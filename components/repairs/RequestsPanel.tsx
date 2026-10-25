@@ -6,7 +6,8 @@ import { assignTechnicianAction, sendRepairRequestsAction, withdrawRepairRequest
 import { useActionRunner } from "@/components/desk/useActionRunner";
 import { Button } from "@/components/ui/button";
 import { CheckboxField, FilterChip } from "@/components/ui/choice";
-import { Callout, Card, CardHeader } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Callout } from "@/components/ui/display";
 import { Field } from "@/components/ui/field";
 import { Dropdown } from "@/components/ui/select";
 import { CHANNEL_LABEL } from "@/lib/repairs/channels";
@@ -27,8 +28,7 @@ export function RequestsPanel({ slug, issueId, open, requests, technicians }: { 
   const toggle = (id: string, on: boolean) => setChosen((list) => (on ? [...list, id] : list.filter((entry) => entry !== id)));
 
   return (
-    <Card as="section" aria-label="Technicians">
-      <CardHeader title="Technicians" description={open ? "Ask one or more. The first to accept gets the job; the others are told and their links close." : undefined} titleAs="h2" />
+    <CollapsibleCard id="repair-technicians" title="Technicians" description={open ? "Ask one or more. The first to accept gets the job; the others are told and their links close." : undefined}>
       <div className="flex flex-col gap-4">
         {requests.length ? (
           <ul className="flex flex-col gap-3" aria-label="Who was asked">
@@ -83,6 +83,6 @@ export function RequestsPanel({ slug, issueId, open, requests, technicians }: { 
         ) : null}
         {error ? <Callout tone="danger" role="alert">{error}</Callout> : null}
       </div>
-    </Card>
+    </CollapsibleCard>
   );
 }

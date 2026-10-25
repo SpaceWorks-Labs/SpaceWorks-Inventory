@@ -7,7 +7,8 @@ import { RequestsPanel } from "@/components/repairs/RequestsPanel";
 import { MoneyPanel } from "@/components/repairs/MoneyPanel";
 import { WorkPanel } from "@/components/repairs/WorkPanel";
 import { StatusPanel } from "@/components/repairs/StatusPanel";
-import { Callout, Card, CardHeader, DetailList, PageHeader } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Callout, DetailList, PageHeader } from "@/components/ui/display";
 import { DetailLayout } from "@/components/ui/layouts";
 import { prisma } from "@/lib/db";
 import { requireSpace } from "@/lib/permissions";
@@ -51,8 +52,7 @@ export default async function RepairPage({ params }: PageProps<"/s/[spaceSlug]/r
       }
     >
       <div className="flex flex-col gap-6">
-        <Card as="section" aria-label="The problem">
-          <CardHeader title="The problem" />
+        <CollapsibleCard id="repair-problem" title="The problem">
           <DetailList
             items={[
               { label: "Item", value: <Link href={`/s/${slug}/items/${repair.item.id}`} className="font-semibold text-accent-text underline-offset-4 hover:underline">{repair.item.name} ({repair.item.sku})</Link> },
@@ -77,21 +77,19 @@ export default async function RepairPage({ params }: PageProps<"/s/[spaceSlug]/r
               ))}
             </ul>
           ) : null}
-        </Card>
+        </CollapsibleCard>
         {repair.fix.remarks || canWork ? (
-          <Card as="section" aria-label="The fix">
-            <CardHeader title="The fix" description={repair.fix.fixedLabel ? `Marked fixed ${repair.fix.fixedLabel}` : undefined} />
+          <CollapsibleCard id="repair-fix" title="The fix" description={repair.fix.fixedLabel ? `Marked fixed ${repair.fix.fixedLabel}` : undefined}>
             {repair.fix.remarks ? <p className="whitespace-pre-line text-body-ui text-ink-secondary">{repair.fix.remarks}</p> : null}
             {repair.fix.partsUsed ? <p className="mt-2 text-body-ui text-ink-secondary"><span className="font-semibold text-ink">Parts: </span>{repair.fix.partsUsed}</p> : null}
             {repair.closeNote ? <p className="mt-2 text-body-ui text-ink-secondary"><span className="font-semibold text-ink">Closing note: </span>{repair.closeNote}</p> : null}
             {canWork ? <WorkPanel slug={slug} currency={space.currency} issueId={repair.id} remarks={repair.fix.remarks ?? ""} partsUsed={repair.fix.partsUsed ?? ""} askedMinor={repair.money?.askedMinor ?? null} /> : null}
-          </Card>
+          </CollapsibleCard>
         ) : null}
         {repair.purchases.length ? (
-          <Card as="section" aria-label="Parts on the buy list">
-            <CardHeader title="Parts on the buy list" />
+          <CollapsibleCard id="repair-parts" title="Parts on the buy list" count={repair.purchases.length}>
             <ul className="flex flex-col gap-1 text-body-ui">{repair.purchases.map((purchase) => <li key={purchase.id}>{purchase.name} · {purchase.status.toLowerCase()}</li>)}</ul>
-          </Card>
+          </CollapsibleCard>
         ) : null}
         <Timeline entries={timeline} />
       </div>

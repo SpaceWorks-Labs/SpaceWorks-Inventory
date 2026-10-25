@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Card, CardHeader, EmptyState } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { EmptyState } from "@/components/ui/display";
 
 export type EvidenceItem = {
   id: string;
@@ -18,8 +19,7 @@ export type EvidenceItem = {
  */
 export function EvidenceGallery({ items, title = "Evidence" }: { items: EvidenceItem[]; title?: string }) {
   return (
-    <Card as="section" aria-label={title}>
-      <CardHeader title={title} description="Photos and scans recorded at each handover." />
+    <CollapsibleCard id="evidence" title={title} count={items.length} defaultOpen={items.length > 0} description="Photos and scans recorded at each handover.">
       {items.length === 0 ? (
         <EmptyState className="border-0 bg-surface py-5">No handovers recorded yet.</EmptyState>
       ) : (
@@ -44,6 +44,6 @@ export function EvidenceGallery({ items, title = "Evidence" }: { items: Evidence
           ))}
         </ul>
       )}
-    </Card>
+    </CollapsibleCard>
   );
 }

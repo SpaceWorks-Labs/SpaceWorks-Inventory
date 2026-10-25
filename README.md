@@ -83,13 +83,21 @@ signed webhooks connect it to the other Space Works apps
 
 ### Run it your way
 
-- Space-manager settings for the whole makerspace (lending policy, member
-  eligibility, evidence rules, fees, payment providers, notifications,
-  branding) and inventory-manager settings for the stock side (categories,
-  units, thresholds, transfer approvals, labels, count schedules). Every
+- Settings for the whole makerspace (lending policy, member eligibility,
+  evidence rules, fees, payment providers, notifications, branding) and for
+  the stock side (categories, units, thresholds, transfer approvals, labels,
+  count schedules, repair requests), all run by the inventory manager. Every
   change is audited.
-- Repairs: report damaged items (also from loan incidents), a technician directory, requests by email, WhatsApp and Telegram, a private link for external technicians, verified fixes and payouts
-- Finance (inventory managers only): one ledger for every payment, refund, payout, purchase and manual entry, with income, expenses and net by period, category, method, item, technician and supplier, and CSV or Excel downloads
+- Repairs: report damaged items (also from loan incidents), keep a directory
+  of technicians, send requests by email, WhatsApp and Telegram, give external
+  technicians a private link, verify fixes and pay them.
+- Finance (inventory managers only): one ledger for every payment, refund,
+  payout, purchase and manual entry, with income, expenses and net by period,
+  category, method, item, technician and supplier, and CSV or Excel downloads.
+- A calm interface: every page's secondary sections fold away and remember
+  your choice, long tables keep their header row in view, the sidebar groups
+  fold, notifications sit behind a bell, and light and dark mode switch with
+  a soft circle that grows from the toggle.
 - Roles: Inventory manager, Staff, Member and Technician
   ([role matrix](docs/RBAC.md)).
 - Reports with CSV and Excel exports, an audit log, email and in-app

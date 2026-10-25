@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, CornerDownRight } from "lucide-react";
 import { setLocationArchivedAction } from "@/app/actions/catalogue";
 import { Button, IconButton } from "@/components/ui/button";
 import { Chip, EmptyState, PageHeader } from "@/components/ui/display";
@@ -55,7 +55,7 @@ export function LocationsView({ slug, rows, parents, canEdit, showArchived }: { 
               <TR key={row.id}>
                 <TD className="min-w-48">
                   <span className="inline-flex items-center gap-2" style={{ paddingLeft: `${Math.min(row.depth, 8) * 20}px` }}>
-                    {row.depth > 0 ? <span aria-hidden className="text-ink-muted">└</span> : null}
+                    {row.depth > 0 ? <CornerDownRight aria-hidden className="size-4 shrink-0 text-ink-muted" /> : null}
                     <span className="font-semibold">{row.name}</span>
                     {row.archived ? <Chip size="sm" tone="outline">Archived</Chip> : null}
                   </span>

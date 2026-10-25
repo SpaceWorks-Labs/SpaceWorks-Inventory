@@ -50,7 +50,7 @@ export default async function RepairsPage({ params, searchParams }: PageProps<"/
       {rows.length === 0 ? (
         <EmptyState patch title={`No ${filter.label.toLowerCase()} repairs.`}>{canReport ? "Report a problem when something is damaged or broken." : "Requests sent to you show up here."}</EmptyState>
       ) : (
-        <Table label="Repairs">
+        <Table long label="Repairs">
           <THead>
             <tr>
               <TH>Repair</TH>

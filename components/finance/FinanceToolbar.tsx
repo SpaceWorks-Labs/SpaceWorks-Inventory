@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
+import { Dropdown } from "@/components/ui/select";
 import { PERIOD_GROUPS, type PeriodGroup } from "@/lib/finance/periods";
 
 /** Period, grouping and the CSV / XLSX downloads (a plain GET form, so it works without JavaScript). */
@@ -10,9 +11,9 @@ export function FinanceToolbar({ fromDay, toDay, group, exportBase }: { fromDay:
         <Field label="From"><Input type="date" name="from" defaultValue={fromDay} max={toDay} /></Field>
         <Field label="To"><Input type="date" name="to" defaultValue={toDay} /></Field>
         <Field label="Group by">
-          <select name="group" defaultValue={group} className="min-h-11 w-full rounded-[10px] border border-line-strong bg-panel px-3 text-body-ui text-ink">
+          <Dropdown name="group" defaultValue={group}>
             {PERIOD_GROUPS.map((entry) => <option key={entry.key} value={entry.key}>{entry.label}</option>)}
-          </select>
+          </Dropdown>
         </Field>
         <Button type="submit" variant="secondary">Show</Button>
       </form>

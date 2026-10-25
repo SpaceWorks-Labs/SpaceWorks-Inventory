@@ -8,6 +8,7 @@ import {
 } from "@/app/actions/payments";
 import { useToast } from "@/components/feedback/ToastProvider";
 import { Button } from "@/components/ui/button";
+import { CollapsibleCard } from "@/components/ui/collapsible";
 import { Card, CardHeader, Chip, DetailList } from "@/components/ui/display";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { formatMoney } from "@/lib/format/money";
@@ -59,8 +60,8 @@ export function LoanPaymentPanel({ summary, spaceSlug, loanId, viewer }: Props) 
   );
 
   return (
-    <Card className="space-y-5">
-      <CardHeader title="Payments" titleAs="h3" action={<Chip tone={summary.headline.tone}>{summary.headline.label}</Chip>} />
+    <CollapsibleCard id="loan-payments" title="Payments" titleAs="h3" action={<Chip tone={summary.headline.tone}>{summary.headline.label}</Chip>}>
+      <div className="space-y-5">
 
       <Table label="Charges">
         <THead>
@@ -180,6 +181,7 @@ export function LoanPaymentPanel({ summary, spaceSlug, loanId, viewer }: Props) 
           </ul>
         </section>
       ) : null}
-    </Card>
+      </div>
+    </CollapsibleCard>
   );
 }

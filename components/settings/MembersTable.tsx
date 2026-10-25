@@ -58,7 +58,7 @@ export function MembersTable({ slug, actorRole, members }: { slug: string; actor
 
   return (
     <>
-      <Table label="Members">
+      <Table long label="Members">
         <THead>
           <tr>
             <TH>Member</TH>

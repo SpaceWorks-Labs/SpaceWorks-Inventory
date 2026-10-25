@@ -1,4 +1,5 @@
-import { EmptyState, SectionHeading } from "@/components/ui/display";
+import { CollapsibleSection } from "@/components/ui/collapsible";
+import { EmptyState } from "@/components/ui/display";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { formatMoney } from "@/lib/format/money";
 import type { Cell, Column, ReportTable } from "@/lib/reports/table";
@@ -10,11 +11,13 @@ function display(column: Column, value: Cell, currency: string) {
   return value;
 }
 
-/** One report table, exactly as it is exported (numbers right-aligned, money in the space currency). */
+/**
+ * One report table, exactly as it is exported (numbers right-aligned, money
+ * in the space currency). Each folds away under its title; empty ones start folded.
+ */
 export function ReportTableView({ table, currency, empty = "Nothing to show for this period." }: { table: ReportTable; currency: string; empty?: string }) {
   return (
-    <section className="space-y-3">
-      <SectionHeading title={table.title} as="h3" />
+    <CollapsibleSection id={`table-${table.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} title={table.title} titleAs="h3" count={table.rows.length} defaultOpen={table.rows.length > 0}>
       {table.rows.length === 0 ? (
         <EmptyState title={empty} />
       ) : (
@@ -39,6 +42,6 @@ export function ReportTableView({ table, currency, empty = "Nothing to show for 
           </TBody>
         </Table>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }
