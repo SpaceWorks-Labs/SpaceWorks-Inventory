@@ -90,6 +90,10 @@ The first public release: everything since the split from SpaceWorks
 
 ### Fixed
 
+- The light/dark switch now grows one clean feathered circle from the
+  account menu: controls no longer run their own colour transitions inside
+  the circle (which looked half-switched), the menu closes before the switch
+  starts, and a pointer choice no longer lights a focus ring on the trigger.
 - Signing in with an authenticator app never asked for the code (the form
   sent a missing code as the text "undefined"), so accounts with two-step
   verification could not sign in with a password or an email link.

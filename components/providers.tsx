@@ -92,9 +92,12 @@ function transitionColorMode(commit: () => void, origin?: ColorModeOrigin) {
   const radius = revealRadius({ x, y }, viewport);
   root.style.setProperty("--sw-reveal-x", `${x}px`);
   root.style.setProperty("--sw-reveal-y", `${y}px`);
-  root.classList.add(plan === "reveal-soft" ? "sw-theme-reveal-soft" : "sw-theme-reveal");
+  // The new mode is a live image: without this, every control with a colour
+  // transition fades from light to dark inside the circle, so it reads as a
+  // muddy flicker instead of one clean edge (found with the reveal probe).
+  root.classList.add(plan === "reveal-soft" ? "sw-theme-reveal-soft" : "sw-theme-reveal", "sw-theme-switching");
   const cleanUp = () => {
-    root.classList.remove("sw-theme-reveal", "sw-theme-reveal-soft");
+    root.classList.remove("sw-theme-reveal", "sw-theme-reveal-soft", "sw-theme-switching");
     root.style.removeProperty("--sw-reveal-x");
     root.style.removeProperty("--sw-reveal-y");
   };

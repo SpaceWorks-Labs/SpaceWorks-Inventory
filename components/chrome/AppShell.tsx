@@ -68,6 +68,7 @@ function SpaceSwitcher({ data, onNavigate }: { data: ShellData; onNavigate?: () 
 function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () => void }) {
   const { mode, toggleColorMode } = useAppColorMode();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const byPointer = useRef(false);
   const name = data.user.name ?? data.user.email;
   return (
     <Menu>
@@ -82,7 +83,16 @@ function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () =>
         </span>
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-ink-muted" />
       </MenuTrigger>
-      <MenuContent side="top" align="start" className="min-w-[232px]">
+      <MenuContent
+        side="top"
+        align="start"
+        className="min-w-[232px]"
+        onPointerDown={() => { byPointer.current = true; }}
+        onKeyDown={() => { byPointer.current = false; }}
+        // Keyboard users get focus back on the trigger; a pointer choice doesn't
+        // light up a focus ring in the middle of the colour switch.
+        onCloseAutoFocus={(event) => { if (byPointer.current) event.preventDefault(); byPointer.current = false; }}
+      >
         <MenuLabel>{name}</MenuLabel>
         <MenuItem asChild>
           <Link href="/account" onClick={onNavigate}>Account settings</Link>
@@ -95,8 +105,11 @@ function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () =>
         <MenuItem
           icon={mode === "dark" ? <Sun /> : <Moon />}
           onSelect={() => {
+            // Let the menu close (and paint) first, so the snapshot the circle
+            // grows over has no open menu in it; then grow from the trigger.
             const rect = triggerRef.current?.getBoundingClientRect();
-            toggleColorMode(rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined);
+            const origin = rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined;
+            requestAnimationFrame(() => requestAnimationFrame(() => toggleColorMode(origin)));
           }}
         >
           {mode === "dark" ? "Light mode" : "Dark mode"}
