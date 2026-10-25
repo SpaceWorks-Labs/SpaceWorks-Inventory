@@ -68,6 +68,10 @@ The first public release: everything since the split from SpaceWorks
 
 ### Changed
 
+- The home page's desk queues and loan lists collapse; empty ones start
+  collapsed, show their count and remember this browser's choice.
+- The notifications link beside the space name is a bell icon instead of
+  the word "Inbox".
 - **Roles: Inventory manager, Staff and Member, plus Technician** (repairs
   only, with an authenticator app). The admin and owner roles are gone; the inventory manager runs the whole space, including
   members, other managers and deleting the space. The space's creator is its

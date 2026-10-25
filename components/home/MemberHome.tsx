@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BorrowingChip, LoanStatusChip } from "@/components/inventory/StatusChips";
 import { buttonClasses } from "@/components/ui/button";
+import { CollapsibleCard } from "@/components/ui/collapsible";
 import { Callout, Card, CardHeader, EmptyState } from "@/components/ui/display";
 import { loanRef } from "@/lib/catalogue/references";
 import { formatRelativeDay } from "@/lib/format/datetime";
@@ -44,16 +45,14 @@ export function MemberHome({ slug, timezone, lendingEnabled, data }: { slug: str
       ) : (
         <>
           {data.active.length > 0 ? (
-            <Card>
-              <CardHeader title="On loan" titleAs="h2" className="mb-2" action={borrow} />
+            <CollapsibleCard id="on-loan" title="On loan" count={data.active.length} action={borrow}>
               <LoanList slug={slug} timezone={timezone} loans={data.active} due />
-            </Card>
+            </CollapsibleCard>
           ) : null}
           {data.pending.length > 0 ? (
-            <Card>
-              <CardHeader title="Requests" titleAs="h2" className="mb-2" action={data.active.length === 0 ? borrow : undefined} />
+            <CollapsibleCard id="requests" title="Requests" count={data.pending.length} action={data.active.length === 0 ? borrow : undefined}>
               <LoanList slug={slug} timezone={timezone} loans={data.pending} due={false} />
-            </Card>
+            </CollapsibleCard>
           ) : null}
         </>
       )}

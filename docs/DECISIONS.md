@@ -107,6 +107,14 @@ only from [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/
    they asked and whether it is paid.
 10. **No pauses.** The build continues without waiting for owner decisions;
    commits stay local on `dev` until the owner's QA.
+11. **Dashboard sections collapse** (2026-10-25). The home page was too busy:
+   each desk queue and the member's loan lists fold behind their title, show
+   their count, start folded when empty and remember this browser's choice
+   (`localStorage`, `swi:dash:<id>`). The stat tiles stay visible.
+12. **Bell for notifications** (2026-10-25). The notifications link beside
+   the space name is a bell icon in the same ink colour (it was the word
+   "Inbox"); the unread count still sits beside it and the link keeps its
+   "Notifications, N unread" name.
 
 ## Defaults the owner may revisit
 
