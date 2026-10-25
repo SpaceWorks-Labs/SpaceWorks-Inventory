@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
-import { TriangleAlert as AlertCircle, Search } from "lucide-react";
+import { TriangleAlert as AlertCircle, Search, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { controlClasses } from "./styles";
 
@@ -144,7 +144,7 @@ export const SearchInput = forwardRef<HTMLInputElement, Omit<InputHTMLAttributes
           aria-label="Clear search"
           className="absolute right-0 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-ink-muted hover:bg-muted hover:text-ink"
         >
-          <span aria-hidden="true" className="inline-flex items-center justify-center text-xs font-semibold">×</span>
+          <X aria-hidden className="size-4" />
         </button>
       ) : null}
     </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Bell, ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
+import { Bell, ChevronsUpDown, LogOut, Menu as MenuIcon, Moon, Sun, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { ShellData } from "@/lib/appShell";
 import { activeNavKey } from "@/lib/nav";
@@ -191,7 +191,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
           <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
             <DialogPrimitive.Trigger asChild>
               <IconButton label="Open navigation menu">
-                <span className="text-xs font-semibold">Menu</span>
+                <MenuIcon aria-hidden className="size-5" />
               </IconButton>
             </DialogPrimitive.Trigger>
             <DialogPrimitive.Portal>
@@ -205,7 +205,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
                   headerAction={
                     <DialogPrimitive.Close asChild>
                       <IconButton label="Close navigation menu" variant="quiet">
-                        <span className="text-xs font-semibold">Close</span>
+                        <X aria-hidden className="size-5" />
                       </IconButton>
                     </DialogPrimitive.Close>
                   }
