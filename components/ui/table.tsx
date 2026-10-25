@@ -9,7 +9,8 @@ export function Table({ className, children, label, long = false, ...props }: HT
   return (
     // `relative` keeps absolutely positioned cell content (sr-only labels) inside the scroll area, so a wide table never widens the page.
     <div className={cn("relative w-full min-w-0 overflow-x-auto rounded-lg border border-line bg-panel", long && "max-h-[min(72vh,760px)] overflow-y-auto")} role="region" aria-label={label ?? "Data table"} tabIndex={0}>
-      <table className={cn("w-full border-collapse text-left text-sm tabular-nums", className)} {...props}>
+      {/* Words never split letter by letter inside a cell (pages set overflow-wrap:anywhere); a tight table scrolls in its box instead. */}
+      <table className={cn("w-full border-collapse text-left text-sm tabular-nums [overflow-wrap:break-word]", className)} {...props}>
         {children}
       </table>
     </div>

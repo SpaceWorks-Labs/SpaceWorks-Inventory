@@ -4,7 +4,9 @@ import {
   cloneElement,
   forwardRef,
   isValidElement,
+  useEffect,
   useId,
+  useRef,
   useState,
   type InputHTMLAttributes,
   type ReactElement,
@@ -46,8 +48,18 @@ export function Field({ label, optional, helperText, error, hideLabel, className
         required: required ?? (childProps.required as boolean | undefined),
       })
     : children;
+  // A control rendered by a Server Component reaches the server render without
+  // the cloned id (it is only wired on the client), and React does not patch
+  // attributes after hydration, so the label would point nowhere. Re-wire it.
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const control = box.current?.querySelector<HTMLElement>("input, select, textarea, [role=combobox]");
+    if (!control || control.id) return;
+    control.id = controlId;
+    if (describedBy && !control.getAttribute("aria-describedby")) control.setAttribute("aria-describedby", describedBy);
+  }, [controlId, describedBy]);
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div ref={box} className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={controlId} className={cn("text-label text-ink", hideLabel && "sr-only")}>
         {label}
         {/* The space keeps the accessible name "Remarks Optional", not "RemarksOptional". */}

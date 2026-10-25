@@ -124,9 +124,9 @@ export default async function ItemPage({ params }: PageProps<"/s/[spaceSlug]/ite
           {low ? <Chip tone="warning">Low stock</Chip> : null}
           {archived ? <Chip tone="outline">Archived</Chip> : null}
         </div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
           {stats.map((stat) => <StatTile key={stat.label} label={stat.label} value={unit ? `${stat.value} ${unit}` : stat.value} />)}
-          <StatTile label="Value" value={value} hint="On hand at average cost" className="col-span-2 lg:col-span-1" />
+          <StatTile label="Value" value={value} hint="On hand at average cost" className="col-span-2 sm:col-span-1" />
         </div>
         <ItemPhotos slug={slug} itemId={id} name={header.name} photos={photos} canEdit={canEdit} />
         <CollapsibleCard id="item-stock" title="Stock by location" count={levelRows.length}>
