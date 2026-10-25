@@ -12,17 +12,17 @@ conservatively during the build and the owner may revisit them.
 
 Space Works is a family of self-hosted, open-source (AGPL-3.0-or-later) tools
 for makerspaces and communities under the
-[SpaceWorks-HQ](https://github.com/SpaceWorks-HQ) organisation. On 2026-10-23
-three areas of the original [SpaceWorks](https://github.com/SpaceWorks-HQ/SpaceWorks)
+[SpaceWorks-Labs](https://github.com/SpaceWorks-Labs) organisation. On 2026-10-23
+three areas of the original [SpaceWorks](https://github.com/SpaceWorks-Labs/SpaceWorks)
 (Django + React) app were split into standalone apps:
-[Inventory](https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory) (this repo:
+[Inventory](https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory) (this repo:
 stock room and lending desk),
-[Machines](https://github.com/SpaceWorks-HQ/SpaceWorks-Machines) and
-[Bookings](https://github.com/SpaceWorks-HQ/SpaceWorks-Bookings).
-[SpaceWorks-Events](https://github.com/SpaceWorks-HQ/SpaceWorks-Events) and
-[SpaceWorks-Workspace](https://github.com/SpaceWorks-HQ/SpaceWorks-Workspace)
+[Machines](https://github.com/SpaceWorks-Labs/SpaceWorks-Machines) and
+[Bookings](https://github.com/SpaceWorks-Labs/SpaceWorks-Bookings).
+[SpaceWorks-Events](https://github.com/SpaceWorks-Labs/SpaceWorks-Events) and
+[SpaceWorks-Workspace](https://github.com/SpaceWorks-Labs/SpaceWorks-Workspace)
 are the reference for structure, install and deploy; brand and UI rules come
-only from [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/).
+only from [SpaceWorks-Design](https://spaceworks-labs.github.io/SpaceWorks-Design/).
 
 ## Locked at the split (2026-10-23)
 
@@ -107,6 +107,20 @@ only from [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/
    they asked and whether it is paid.
 10. **No pauses.** The build continues without waiting for owner decisions;
    commits stay local on `dev` until the owner's QA.
+11. **Dashboard sections collapse** (2026-10-25). The home page was too busy:
+   each desk queue and the member's loan lists fold behind their title, show
+   their count, start folded when empty and remember this browser's choice
+   (`localStorage`, `swi:dash:<id>`). The stat tiles stay visible.
+12. **Bell for notifications** (2026-10-25). The notifications link beside
+   the space name is a bell icon in the same ink colour (it was the word
+   "Inbox"); the unread count still sits beside it and the link keeps its
+   "Notifications, N unread" name.
+13. **Collapsible everywhere it reduces clutter** (2026-10-25). Secondary or
+   empty sections on busy pages fold (CollapsibleCard for cards,
+   CollapsibleSection for headed tables), keyed by the kind of section so a
+   choice applies on every page that shows it; the primary content and
+   forms in progress stay open. Long tables cap their height and keep a
+   sticky header.
 
 ## Defaults the owner may revisit
 

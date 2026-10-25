@@ -65,7 +65,7 @@ and commit the regenerated files.
   at or under 300 lines; ESLint's `max-lines` enforces it. Split by
   responsibility behind an `index.ts`. Generated files are exempt.
 - **Design system.** Follow [docs/DESIGN.md](docs/DESIGN.md) (source of truth:
-  [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/)).
+  [SpaceWorks-Design](https://spaceworks-labs.github.io/SpaceWorks-Design/)).
   Colours come only from tokens, never hard-coded hex; Gilroy everywhere, with
   Unbounded for one accent phrase on auth and empty-state heroes; light and
   dark mode for everything; status pills always carry a word.

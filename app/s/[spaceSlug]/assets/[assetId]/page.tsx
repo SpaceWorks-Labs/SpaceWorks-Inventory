@@ -8,7 +8,8 @@ import { CONDITION_LABEL } from "@/components/catalogue/words";
 import { AssetStatusChip } from "@/components/inventory/StatusChips";
 import { MovementsTable } from "@/components/stock/MovementsTable";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, DetailList, PageHeader } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { DetailList, PageHeader } from "@/components/ui/display";
 import { DetailLayout } from "@/components/ui/layouts";
 import { loanRef, transferRef } from "@/lib/catalogue/references";
 import { loadMovements, locationOptions, qrSvg } from "@/lib/catalogue/views";
@@ -67,33 +68,28 @@ export default async function AssetPage({ params }: PageProps<"/s/[spaceSlug]/as
       }
       aside={
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader title="QR label" description="Scan it at the desk to issue, return or count this unit." />
+          <CollapsibleCard id="asset-qr" title="QR label" description="Scan it at the desk to issue, return or count this unit.">
             <QrPlate svg={qr} label={`QR code for ${header.tag}`} />
             <Button asChild variant="secondary" className="mt-4" fullWidth><a href={labelHref} target="_blank" rel="noopener">Print label</a></Button>
-          </Card>
-          <Card>
-            <CardHeader title="Details" />
+          </CollapsibleCard>
+          <CollapsibleCard id="asset-details" title="Details">
             <DetailList items={facts} />
             {header.notes ? <p className="mt-4 whitespace-pre-wrap text-body-ui text-ink-secondary">{header.notes}</p> : null}
-          </Card>
+          </CollapsibleCard>
         </div>
       }
     >
       <div className="flex flex-col gap-6">
         <div><AssetStatusChip status={header.status} /></div>
-        <Card>
-          <CardHeader title="Movements" action={<Button asChild variant="ghost" size="sm"><Link href={`/s/${slug}/stock/movements?asset=${encodeURIComponent(header.id)}`}>Full ledger</Link></Button>} />
+        <CollapsibleCard id="asset-movements" title="Movements" action={<Button asChild variant="ghost" size="sm"><Link href={`/s/${slug}/stock/movements?asset=${encodeURIComponent(header.id)}`}>Full ledger</Link></Button>} count={movements.length} defaultOpen={movements.length > 0}>
           {movements.length === 0 ? <p className="text-body-ui text-ink-muted">No movements yet.</p> : <MovementsTable slug={slug} rows={movements} showItem={false} />}
-        </Card>
-        <Card>
-          <CardHeader title="Loans" />
+        </CollapsibleCard>
+        <CollapsibleCard id="asset-loans" title="Loans" count={loans.length} defaultOpen={loans.length > 0}>
           <AssetLoans slug={slug} rows={loans} />
-        </Card>
-        <Card>
-          <CardHeader title="Transfers" />
+        </CollapsibleCard>
+        <CollapsibleCard id="asset-transfers" title="Transfers" count={transfers.length} defaultOpen={transfers.length > 0}>
           <AssetTransfers slug={slug} rows={transfers} />
-        </Card>
+        </CollapsibleCard>
       </div>
     </DetailLayout>
   );

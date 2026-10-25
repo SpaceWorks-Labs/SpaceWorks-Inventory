@@ -4,7 +4,8 @@ import { useState } from "react";
 import { resolveIncidentAction } from "@/app/actions/loans";
 import type { LocationOption } from "@/components/desk/LocationPicker";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, Chip } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Chip } from "@/components/ui/display";
 import { useActionRunner } from "@/components/desk/useActionRunner";
 import { ResolveIncidentDialog } from "./ResolveIncidentDialog";
 
@@ -19,8 +20,7 @@ export function IncidentList({ slug, incidents, canResolve, locations }: { slug:
   const runner = useActionRunner();
   if (incidents.length === 0) return null;
   return (
-    <Card as="section" aria-label="Incidents">
-      <CardHeader title="Incidents" description="Lost or damaged units. While one is open the member may be restricted from borrowing." />
+    <CollapsibleCard id="loan-incidents" title="Incidents" description="Lost or damaged units. While one is open the member may be restricted from borrowing." count={incidents.length}>
       <ul className="flex flex-col divide-y divide-line">
         {incidents.map((incident) => (
           <li key={incident.id} className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">
@@ -48,6 +48,6 @@ export function IncidentList({ slug, incidents, canResolve, locations }: { slug:
           onConfirm={(input) => void runner.run(() => resolveIncidentAction(slug, { incidentId: resolving.id, ...input }), "Incident resolved.").then((ok) => { if (ok) setResolving(null); })}
         />
       ) : null}
-    </Card>
+    </CollapsibleCard>
   );
 }

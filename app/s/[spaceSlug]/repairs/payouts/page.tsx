@@ -28,7 +28,7 @@ export default async function RepairPayoutsPage({ params }: PageProps<"/s/[space
   return (
     <ListLayout header={<PageHeader title="Repair payouts" description="Money paid to technicians. Each payout is also in the finance ledger." />}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <StatTile label="Paid (shown below)" value={formatMoney(total, currency)} />
+        <StatTile label="Paid" value={formatMoney(total, currency)} hint={payouts.length === 500 ? "The latest 500 payouts" : `${payouts.length} ${payouts.length === 1 ? "payout" : "payouts"}`} />
         <StatTile label="Approved, not paid yet" value={formatMoney(unpaid, currency)} tone={unpaid > 0 ? "attention" : "default"} />
       </div>
       {payouts.length === 0 ? <EmptyState patch title="No payouts yet.">Approve a fixed repair&apos;s amount, then record the payout on the repair.</EmptyState> : (

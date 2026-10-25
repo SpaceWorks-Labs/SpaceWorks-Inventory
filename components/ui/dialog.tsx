@@ -2,6 +2,7 @@
 
 import { forwardRef, useState, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 import { Button, IconButton } from "./button";
@@ -37,7 +38,7 @@ export const DialogContent = forwardRef<
         {hideClose ? null : (
           <DialogPrimitive.Close asChild>
             <IconButton label="Close" size="sm" className="absolute right-3 top-3">
-              <span aria-hidden="true" className="inline-flex items-center justify-center text-xs font-semibold">×</span>
+              <X aria-hidden className="size-4" />
             </IconButton>
           </DialogPrimitive.Close>
         )}

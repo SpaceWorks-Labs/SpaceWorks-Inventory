@@ -23,7 +23,7 @@ describe("VPS installer configuration", () => {
     expect(check("is_safe_path", "/etc/spaceworks-inventory")).toBe(true);
     expect(check("is_safe_path", "/etc/space works")).toBe(false);
     expect(check("is_safe_path", "relative")).toBe(false);
-    expect(check("is_repository", "SpaceWorks-HQ/SpaceWorks-Inventory")).toBe(true);
+    expect(check("is_repository", "SpaceWorks-Labs/SpaceWorks-Inventory")).toBe(true);
     expect(check("is_repository", "owner/..")).toBe(false);
     expect(lib("release_version 0123456789abcdef0123456789abcdef01234567").stdout).toBe("vps-0123456789ab");
   });

@@ -1,6 +1,7 @@
 import type { BorrowingStatus } from "@prisma/client";
 import { BorrowingChip } from "@/components/inventory/StatusChips";
-import { Card, CardHeader, DetailList } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { DetailList } from "@/components/ui/display";
 
 export type LoanFactsView = {
   borrower: { name: string; email: string } | null;
@@ -17,9 +18,8 @@ export function LoanFacts({ view }: { view: LoanFactsView }) {
     ...view.facts.map((fact) => ({ label: fact.label, value: fact.value })),
   ];
   return (
-    <Card as="section" aria-label="Details">
-      <CardHeader title="Details" />
+    <CollapsibleCard id="loan-details" title="Details">
       <DetailList items={items} />
-    </Card>
+    </CollapsibleCard>
   );
 }

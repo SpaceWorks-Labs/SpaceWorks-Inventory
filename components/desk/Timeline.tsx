@@ -1,12 +1,11 @@
-import { Card, CardHeader } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
 
 export type TimelineEntry = { id: string; title: string; detail?: string | null; actorName: string; whenLabel: string };
 
-/** The audit trail of one record, newest first. */
+/** The audit trail of one record, newest first; folds away and remembers it. */
 export function Timeline({ entries, title = "Timeline" }: { entries: TimelineEntry[]; title?: string }) {
   return (
-    <Card as="section" aria-label={title}>
-      <CardHeader title={title} />
+    <CollapsibleCard id="timeline" title={title} count={entries.length}>
       {entries.length === 0 ? (
         <p className="text-body-ui text-ink-muted">Nothing has happened yet.</p>
       ) : (
@@ -21,6 +20,6 @@ export function Timeline({ entries, title = "Timeline" }: { entries: TimelineEnt
           ))}
         </ol>
       )}
-    </Card>
+    </CollapsibleCard>
   );
 }

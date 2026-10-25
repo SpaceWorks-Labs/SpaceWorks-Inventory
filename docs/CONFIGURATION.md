@@ -123,7 +123,7 @@ These belong to the [VPS installer](DEPLOYMENT_VPS.md), not the application.
 | --- | --- |
 | `SWI_DIR` | Install root, `/opt/spaceworks-inventory` (`--dir`) |
 | `SWI_CONFIG_DIR` | External secrets and configuration directory, `/etc/spaceworks-inventory` |
-| `SWI_REPOSITORY` | GitHub owner/name to install from (`--repo`); defaults to `SpaceWorks-HQ/SpaceWorks-Inventory` |
+| `SWI_REPOSITORY` | GitHub owner/name to install from (`--repo`); defaults to `SpaceWorks-Labs/SpaceWorks-Inventory` |
 | `SWI_RELEASE_TAG`, `SWI_REF` | A published release or a source reference to build (`--release`, `--ref`); choose only one |
 | `SWI_GITHUB_TOKEN`, `SWI_GITHUB_USER` | Read credential for a private repository and its packages, and the account that owns it (see [the VPS guide](DEPLOYMENT_VPS.md#private-repository-and-packages)) |
 | `SWI_CADDY_TLS` | `internal` (LAN or trial), `proxy` (your own reverse proxy) or unset for automatic public HTTPS; recorded in `compose.env` |

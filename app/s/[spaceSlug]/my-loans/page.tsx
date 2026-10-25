@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { MyLoansTable } from "@/components/loans/MyLoansTable";
 import { buttonClasses } from "@/components/ui/button";
-import { Callout, EmptyState, PageHeader, SectionHeading } from "@/components/ui/display";
+import { CollapsibleSection } from "@/components/ui/collapsible";
+import { Callout, EmptyState, PageHeader } from "@/components/ui/display";
 import { ListLayout } from "@/components/ui/layouts";
 import { loanRef } from "@/lib/catalogue/references";
 import { prisma } from "@/lib/db";
@@ -43,15 +44,13 @@ export default async function MyLoansPage({ params }: PageProps<"/s/[spaceSlug]/
         <EmptyState patch title="No loans yet." action={lendingOn ? <Link href={`/s/${slug}/catalogue`} className={buttonClasses({ variant: "secondary" })}>Open the catalogue</Link> : undefined}>Borrow a tool from the catalogue and it shows up here.</EmptyState>
       ) : (
         <div className="flex flex-col gap-8">
-          <section aria-label="Open loans" className="flex flex-col gap-3">
-            <SectionHeading title="Open" description="Requests, loans ready to collect and things you still have." />
+          <CollapsibleSection id="my-loans-open" title="Open" count={open.length} description="Requests, loans ready to collect and things you still have.">
             {open.length ? <MyLoansTable slug={slug} rows={open} label="Open loans" /> : <EmptyState>Nothing out right now.</EmptyState>}
-          </section>
+          </CollapsibleSection>
           {past.length ? (
-            <section aria-label="Past loans" className="flex flex-col gap-3">
-              <SectionHeading title="Past" />
+            <CollapsibleSection id="my-loans-past" title="Past" count={past.length} defaultOpen={false}>
               <MyLoansTable slug={slug} rows={past} label="Past loans" />
-            </section>
+            </CollapsibleSection>
           ) : null}
         </div>
       )}

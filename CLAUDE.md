@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Space Works Inventory agent guide
 
-> **Start here:** `docs/DECISIONS.md` explains what this repo is (a standalone app split out of SpaceWorks, part of the SpaceWorks-HQ family), every decision already made and the checks left for the owner.
+> **Start here:** `docs/DECISIONS.md` explains what this repo is (a standalone app split out of SpaceWorks, part of the SpaceWorks-Labs family), every decision already made and the checks left for the owner.
 
 `CLAUDE.md` is a byte-identical copy of this file so every coding agent reads
 the same rules. Edit `AGENTS.md`, then copy it over `CLAUDE.md`
@@ -147,7 +147,7 @@ the role and checked by `lib/lending/access.ts`.
 ## Design system
 
 Follow [docs/DESIGN.md](docs/DESIGN.md) (source of truth:
-[SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/)).
+[SpaceWorks-Design](https://spaceworks-labs.github.io/SpaceWorks-Design/)).
 Colours only from tokens (`app/styles/tokens.css` via the utilities in
 `app/globals.css`: `bg-canvas`, `bg-panel`, `bg-primary`, `bg-sidebar`,
 `sw-*`); never hard-coded hex. Gilroy everywhere, Unbounded (`font-accent`)

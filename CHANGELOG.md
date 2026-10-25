@@ -68,6 +68,17 @@ The first public release: everything since the split from SpaceWorks
 
 ### Changed
 
+- The home page's desk queues and loan lists collapse; empty ones start
+  collapsed, show their count and remember this browser's choice.
+- The notifications link beside the space name is a bell icon instead of
+  the word "Inbox".
+- Secondary sections fold on every busy page and remember the choice: item,
+  asset, loan, transfer and repair details, the timeline and evidence,
+  report and finance tables, integrations, members' invitations, count
+  schedules, the repair shelf and the account page. Long lists (items,
+  assets, loans, stock movements, members, the buy list, repairs and the
+  ledger) scroll inside their box with the header row kept in view.
+- Back links and the location tree use icons instead of arrow characters.
 - **Roles: Inventory manager, Staff and Member, plus Technician** (repairs
   only, with an authenticator app). The admin and owner roles are gone; the inventory manager runs the whole space, including
   members, other managers and deleting the space. The space's creator is its
@@ -79,6 +90,10 @@ The first public release: everything since the split from SpaceWorks
 
 ### Fixed
 
+- The light/dark switch now grows one clean feathered circle from the
+  account menu: controls no longer run their own colour transitions inside
+  the circle (which looked half-switched), the menu closes before the switch
+  starts, and a pointer choice no longer lights a focus ring on the trigger.
 - Signing in with an authenticator app never asked for the code (the form
   sent a missing code as the text "undefined"), so accounts with two-step
   verification could not sign in with a password or an email link.
@@ -150,5 +165,5 @@ lending desk for makerspaces, with several makerspaces on one install.
   DigitalOcean App Platform spec, a Cloudflare cron Worker, and multi-arch
   backend and frontend images on GitHub Packages.
 
-[Unreleased]: https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/commits/dev
-[0.1.0]: https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/releases
+[Unreleased]: https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/commits/dev
+[0.1.0]: https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/releases

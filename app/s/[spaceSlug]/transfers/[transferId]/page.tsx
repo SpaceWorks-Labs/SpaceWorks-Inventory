@@ -5,7 +5,8 @@ import { Timeline } from "@/components/desk/Timeline";
 import { TransferStatusChip } from "@/components/inventory/StatusChips";
 import { TransferLinesTable } from "@/components/transfers/TransferLinesTable";
 import { TransferSteps } from "@/components/transfers/TransferSteps";
-import { Callout, Card, CardHeader, DetailList, PageHeader } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Callout, DetailList, PageHeader } from "@/components/ui/display";
 import { DetailLayout } from "@/components/ui/layouts";
 import { transferRef } from "@/lib/catalogue/references";
 import { locationOptions } from "@/lib/desk/locations";
@@ -63,14 +64,13 @@ export default async function TransferPage({ params, searchParams }: PageProps<"
 
   return (
     <DetailLayout
-      back={{ href: `/s/${slug}/transfers`, label: "Back to transfers" }}
+      back={{ href: `/s/${slug}/transfers`, label: "Transfers" }}
       header={<PageHeader kicker={<span className="inline-flex items-center gap-2">Transfer <TransferStatusChip status={status} /></span>} title={reference} description={transfer.betweenSpaces ? `${transfer.source.name} to ${transfer.dest.name}` : "Between shelves of this space"} />}
       aside={
         <div className="flex flex-col gap-4">
-          <Card as="section" aria-label="Details">
-            <CardHeader title="Details" />
+          <CollapsibleCard id="transfer-details" title="Details">
             <DetailList items={facts} />
-          </Card>
+          </CollapsibleCard>
           {otherHref ? <Link href={otherHref} className="inline-flex min-h-11 items-center text-sm font-semibold text-accent-text hover:underline">Open as {otherName}</Link> : null}
         </div>
       }

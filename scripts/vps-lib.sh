@@ -6,7 +6,7 @@
 SWI_DIR=${SWI_DIR:-/opt/spaceworks-inventory}
 SWI_DEFAULT_CONFIG_DIR=/etc/spaceworks-inventory
 # shellcheck disable=SC2034 # used by the scripts that source this file
-SWI_DEFAULT_REPOSITORY=SpaceWorks-HQ/SpaceWorks-Inventory
+SWI_DEFAULT_REPOSITORY=SpaceWorks-Labs/SpaceWorks-Inventory
 
 say() { printf '[Space Works Inventory] %s\n' "$*"; }
 warn() { printf '[Space Works Inventory] WARNING: %s\n' "$*" >&2; }

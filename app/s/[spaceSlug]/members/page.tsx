@@ -2,7 +2,8 @@ import Link from "next/link";
 import { InvitationsPanel } from "@/components/settings/InvitationsPanel";
 import { MembersTable } from "@/components/settings/MembersTable";
 import { Button } from "@/components/ui/button";
-import { PageHeader, SectionHeading } from "@/components/ui/display";
+import { CollapsibleSection } from "@/components/ui/collapsible";
+import { PageHeader } from "@/components/ui/display";
 import { Dropdown, Field, Input } from "@/components/ui/field";
 import { ListLayout } from "@/components/ui/layouts";
 import { formatDate, formatRelativeTime } from "@/lib/format/datetime";
@@ -74,10 +75,9 @@ export default async function MembersPage({ params, searchParams }: PageProps<"/
     >
       <MembersTable slug={space.slug} actorRole={membership.role} members={members} />
       {isAdmin ? (
-        <section className="flex flex-col gap-4">
-          <SectionHeading title="Invitations" description="Invite people by email, other inventory managers included." />
+        <CollapsibleSection id="members-invitations" title="Invitations" count={invitations.length} description="Invite people by email, other inventory managers included.">
           <InvitationsPanel slug={space.slug} roles={inviteRoles} invitations={invitations} />
-        </section>
+        </CollapsibleSection>
       ) : null}
     </ListLayout>
   );

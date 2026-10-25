@@ -192,7 +192,7 @@ export function StatTile({ label, value, hint, progress, tone = "default", class
   const body = (
     <>
       <span className="block text-sm text-ink-muted">{label}</span>
-      <span className="mt-1 block text-stat text-ink">{value}</span>
+      <span className="mt-1 block text-stat text-ink [overflow-wrap:break-word]">{value}</span>
       {hint ? <span className="mt-0.5 block text-caption text-ink-muted">{hint}</span> : null}
       {progress ? <ProgressBar className="mt-2.5" value={progress.value} max={progress.max} tone={progress.tone ?? "accent"} /> : null}
     </>

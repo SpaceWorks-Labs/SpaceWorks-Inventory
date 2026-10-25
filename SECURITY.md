@@ -7,7 +7,7 @@ discussion or pull request.
 
 Use GitHub's private vulnerability reporting: open the repository's
 **Security** tab and choose **Report a vulnerability**
-(<https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/security/advisories/new>).
+(<https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/security/advisories/new>).
 Only the maintainers can see the report. Include:
 
 - what an attacker can do, and which role or access they need;

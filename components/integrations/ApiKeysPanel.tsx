@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { revokeApiKeyAction } from "@/app/actions/integrations";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { Card, CardHeader, Chip, EmptyState } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Chip, EmptyState } from "@/components/ui/display";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { useToast } from "@/components/feedback/ToastProvider";
 import { CreateApiKeyDialog } from "./CreateApiKeyDialog";
@@ -24,12 +25,7 @@ export function ApiKeysPanel({ slug, keys }: { slug: string; keys: ApiKeyRow[] }
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card as="section" aria-labelledby="api-keys-heading">
-      <CardHeader
-        title={<span id="api-keys-heading">API keys</span>}
-        description="For scripts and other tools that read or change this space through the REST API at /api/v1."
-        action={<CreateApiKeyDialog slug={slug} />}
-      />
+    <CollapsibleCard id="api-keys" title="API keys" count={keys.length} description="For scripts and other tools that read or change this space through the REST API at /api/v1." action={<CreateApiKeyDialog slug={slug} />}>
       {keys.length === 0 ? (
         <EmptyState title="No API keys yet.">Create one when a tool needs to reach this space.</EmptyState>
       ) : (
@@ -87,6 +83,6 @@ export function ApiKeysPanel({ slug, keys }: { slug: string; keys: ApiKeyRow[] }
           });
         }}
       />
-    </Card>
+    </CollapsibleCard>
   );
 }

@@ -9,7 +9,7 @@ export type AssetListRow = { id: string; assetTag: string; serialNumber: string 
 /** Serialized units across the space; the asset tag is the row link. */
 export function AssetsTable({ slug, rows }: { slug: string; rows: AssetListRow[] }) {
   return (
-    <Table label="Assets">
+    <Table long label="Assets">
       <THead>
         <tr><TH>Asset tag</TH><TH>Item</TH><TH>Serial number</TH><TH>Status</TH><TH>Condition</TH><TH>Location</TH></tr>
       </THead>

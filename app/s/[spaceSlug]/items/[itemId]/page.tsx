@@ -9,7 +9,8 @@ import { QrPlate } from "@/components/catalogue/QrPlate";
 import { RENTAL_MODE_LABEL } from "@/components/catalogue/words";
 import { MovementsTable } from "@/components/stock/MovementsTable";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, Chip, DetailList, PageHeader, StatTile } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Chip, DetailList, PageHeader, StatTile } from "@/components/ui/display";
 import { DetailLayout } from "@/components/ui/layouts";
 import { itemImageUrl } from "@/lib/catalogue/images";
 import { loadMovements, locationOptions, qrSvg } from "@/lib/catalogue/views";
@@ -100,20 +101,17 @@ export default async function ItemPage({ params }: PageProps<"/s/[spaceSlug]/ite
       }
       aside={
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader title="QR label" description="Scanning it opens this item." />
+          <CollapsibleCard id="item-qr" title="QR label" description="Scanning it opens this item.">
             <QrPlate svg={qr} label={`QR code for ${header.name}`} />
             <Button asChild variant="secondary" className="mt-4" fullWidth><a href={labelHref} target="_blank" rel="noopener">Print label</a></Button>
-          </Card>
-          <Card>
-            <CardHeader title="Details" />
+          </CollapsibleCard>
+          <CollapsibleCard id="item-details" title="Details">
             <DetailList items={facts} />
-          </Card>
+          </CollapsibleCard>
           {lending.length > 0 ? (
-            <Card>
-              <CardHeader title="Lending" description="Default means the category, then the space setting." />
+            <CollapsibleCard id="item-lending" title="Lending" description="Default means the category, then the space setting." defaultOpen={false}>
               <DetailList items={lending} />
-            </Card>
+            </CollapsibleCard>
           ) : null}
         </div>
       }
@@ -126,18 +124,16 @@ export default async function ItemPage({ params }: PageProps<"/s/[spaceSlug]/ite
           {low ? <Chip tone="warning">Low stock</Chip> : null}
           {archived ? <Chip tone="outline">Archived</Chip> : null}
         </div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
           {stats.map((stat) => <StatTile key={stat.label} label={stat.label} value={unit ? `${stat.value} ${unit}` : stat.value} />)}
-          <StatTile label="Value" value={value} hint="On hand at average cost" className="col-span-2 lg:col-span-1" />
+          <StatTile label="Value" value={value} hint="On hand at average cost" className="col-span-2 sm:col-span-1" />
         </div>
         <ItemPhotos slug={slug} itemId={id} name={header.name} photos={photos} canEdit={canEdit} />
-        <Card>
-          <CardHeader title="Stock by location" />
+        <CollapsibleCard id="item-stock" title="Stock by location" count={levelRows.length}>
           <StockByLocation rows={levelRows} unit={unit} />
-        </Card>
+        </CollapsibleCard>
         {header.tracking === "SERIALIZED" ? (
-          <Card id="add-assets">
-            <CardHeader title="Assets" description="Each unit has its own tag and QR code." />
+          <CollapsibleCard id="item-assets" anchor="add-assets" title="Assets" count={assets.length} description="Each unit has its own tag and QR code.">
             <ItemAssetsTable slug={slug} rows={assets} />
             {canEdit && !archived ? (
               <div className="mt-6 border-t border-line pt-6">
@@ -145,17 +141,15 @@ export default async function ItemPage({ params }: PageProps<"/s/[spaceSlug]/ite
                 <AddAssetsForm slug={slug} itemId={id} locations={locations} currency={currency} minorDigits={minorDigits} />
               </div>
             ) : null}
-          </Card>
+          </CollapsibleCard>
         ) : null}
-        <Card>
-          <CardHeader title="Recent movements" action={<Button asChild variant="ghost" size="sm"><Link href={`/s/${slug}/stock/movements?item=${encodeURIComponent(id)}`}>Full ledger</Link></Button>} />
+        <CollapsibleCard id="item-movements" title="Recent movements" count={movements.length} defaultOpen={movements.length > 0} action={<Button asChild variant="ghost" size="sm"><Link href={`/s/${slug}/stock/movements?item=${encodeURIComponent(id)}`}>Full ledger</Link></Button>}>
           {movements.length === 0 ? <p className="text-body-ui text-ink-muted">No stock movements yet.</p> : <MovementsTable slug={slug} rows={movements} showItem={false} />}
-        </Card>
+        </CollapsibleCard>
         {header.notes ? (
-          <Card>
-            <CardHeader title="Notes" />
+          <CollapsibleCard id="item-notes" title="Notes">
             <p className="whitespace-pre-wrap text-body-ui text-ink-secondary">{header.notes}</p>
-          </Card>
+          </CollapsibleCard>
         ) : null}
       </div>
     </DetailLayout>

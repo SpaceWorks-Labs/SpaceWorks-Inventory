@@ -6,7 +6,8 @@ import { PasswordForm } from "@/components/account/PasswordForm";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import { SessionsCard } from "@/components/account/SessionsCard";
 import { Button } from "@/components/ui/button";
-import { Card, PageHeader, SettingsRow } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { PageHeader, SettingsRow } from "@/components/ui/display";
 import { prisma } from "@/lib/db";
 import { remainingRecoveryCodes } from "@/lib/mfa";
 import { requireAuth } from "@/lib/permissions";
@@ -30,7 +31,7 @@ export default async function AccountPage() {
     <SimpleShell>
       <div className="flex flex-col gap-6">
         <PageHeader title="Your account" description={user.email} />
-        <Card padding="lg">
+        <CollapsibleCard id="account-sign-in" title="Profile and sign-in">
           <SettingsRow title="Profile" description="Shown to staff on your loans in every space.">
             <ProfileForm initial={{ name: user.name ?? "", phone: user.phone ?? "" }} />
           </SettingsRow>
@@ -40,9 +41,13 @@ export default async function AccountPage() {
           <SettingsRow title="Two-step verification" description="A code from your phone at every sign-in.">
             <MfaCard enabled={Boolean(user.mfaEnabledAt)} remainingCodes={remaining} />
           </SettingsRow>
-          <SettingsRow title="Appearance" description="Saved in this browser only.">
+        </CollapsibleCard>
+        <CollapsibleCard id="account-appearance" title="Appearance">
+          <SettingsRow title="Colour mode" description="Saved in this browser only.">
             <AppearanceCard />
           </SettingsRow>
+        </CollapsibleCard>
+        <CollapsibleCard id="account-data" title="Sessions and your data" defaultOpen={false}>
           <SettingsRow title="Sessions" description="Lost a device? Sign out of every session at once.">
             <SessionsCard />
           </SettingsRow>
@@ -51,7 +56,9 @@ export default async function AccountPage() {
               <a href="/api/account/export" download>Download my data</a>
             </Button>
           </SettingsRow>
-          <SettingsRow title="Spaces" description="Where you're a member.">
+        </CollapsibleCard>
+        <CollapsibleCard id="account-spaces" title="Spaces" count={spaces.length}>
+          <SettingsRow title="Your spaces" description="Where you're a member.">
             {spaces.length === 0 ? (
               <p className="text-body-ui text-ink-muted">You aren&apos;t in any space yet.</p>
             ) : (
@@ -65,7 +72,7 @@ export default async function AccountPage() {
               </ul>
             )}
           </SettingsRow>
-        </Card>
+        </CollapsibleCard>
       </div>
     </SimpleShell>
   );

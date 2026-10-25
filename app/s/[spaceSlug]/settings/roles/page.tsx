@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SettingsTabs } from "@/components/settings/SettingsTabs";
-import { Card, CardHeader, Chip, PageHeader, SectionHeading } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Chip, PageHeader, SectionHeading } from "@/components/ui/display";
 import { SettingsLayout } from "@/components/ui/layouts";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { requireSpace } from "@/lib/permissions";
@@ -26,8 +27,7 @@ export default async function RolesPage({ params }: PageProps<"/s/[spaceSlug]/se
           title="Roles"
           description="Each person has one role in this space. Higher roles can do everything the roles below them can. Borrowing standing is separate from the role."
         />
-        <Card padding="lg">
-          <CardHeader title="What each role is for" description={<>Change someone&apos;s role on the <Link href={`/s/${slug}/members`} className="font-semibold text-accent-text underline underline-offset-4">members page</Link>.</>} />
+        <CollapsibleCard id="roles-explained" title="What each role is for" description={<>Change someone&apos;s role on the <Link href={`/s/${slug}/members`} className="font-semibold text-accent-text underline underline-offset-4">members page</Link>.</>}>
           <dl className="grid gap-4 sm:grid-cols-2">
             {roleCards.map((card) => (
               <div key={card.role} className="rounded-lg border border-line p-4">
@@ -36,7 +36,7 @@ export default async function RolesPage({ params }: PageProps<"/s/[spaceSlug]/se
               </div>
             ))}
           </dl>
-        </Card>
+        </CollapsibleCard>
         <Table label="What each role can do">
           <THead>
             <tr>

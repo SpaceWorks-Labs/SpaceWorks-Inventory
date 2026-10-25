@@ -1,12 +1,16 @@
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-/** Rounded (16px), bordered table with 48px rows that scrolls inside its own box on small screens (docs/DESIGN.md §4.8). */
-export function Table({ className, children, label, ...props }: HTMLAttributes<HTMLTableElement> & { label?: string }) {
+/**
+ * Rounded (16px), bordered table with 48px rows that scrolls inside its own box on small screens (docs/DESIGN.md §4.8).
+ * `long` caps its height so long lists scroll inside the box with the header row kept in view.
+ */
+export function Table({ className, children, label, long = false, ...props }: HTMLAttributes<HTMLTableElement> & { label?: string; long?: boolean }) {
   return (
     // `relative` keeps absolutely positioned cell content (sr-only labels) inside the scroll area, so a wide table never widens the page.
-    <div className="relative w-full min-w-0 overflow-x-auto rounded-lg border border-line bg-panel" role="region" aria-label={label ?? "Data table"} tabIndex={0}>
-      <table className={cn("w-full border-collapse text-left text-sm tabular-nums", className)} {...props}>
+    <div className={cn("relative w-full min-w-0 overflow-x-auto rounded-lg border border-line bg-panel", long && "max-h-[min(72vh,760px)] overflow-y-auto")} role="region" aria-label={label ?? "Data table"} tabIndex={0}>
+      {/* Words never split letter by letter inside a cell (pages set overflow-wrap:anywhere); a tight table scrolls in its box instead. */}
+      <table className={cn("w-full border-collapse text-left text-sm tabular-nums [overflow-wrap:break-word]", className)} {...props}>
         {children}
       </table>
     </div>
@@ -26,7 +30,7 @@ export function TR({ className, ...props }: HTMLAttributes<HTMLTableRowElement>)
 }
 
 export function TH({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th scope="col" className={cn("h-12 whitespace-nowrap border-b border-line px-4 py-2 text-sm font-semibold text-accent-text", className)} {...props} />;
+  return <th scope="col" className={cn("sticky top-0 z-[1] h-12 whitespace-nowrap border-b border-line bg-surface px-4 py-2 text-sm font-semibold text-accent-text", className)} {...props} />;
 }
 
 export function TD({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {

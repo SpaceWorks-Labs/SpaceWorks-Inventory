@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { MessagingCard } from "@/components/repairs/MessagingCard";
 import { TechnicianDialog } from "@/components/repairs/TechnicianDialog";
 import { TechniciansTable } from "@/components/repairs/TechniciansTable";
-import { PageHeader, SectionHeading } from "@/components/ui/display";
+import { CollapsibleSection } from "@/components/ui/collapsible";
+import { PageHeader } from "@/components/ui/display";
 import { ListLayout } from "@/components/ui/layouts";
 import { prisma } from "@/lib/db";
 import { requireSpace } from "@/lib/permissions";
@@ -41,10 +42,9 @@ export default async function TechniciansPage({ params }: PageProps<"/s/[spaceSl
       header={<PageHeader title="Technicians" description="Who repairs things for this space: members with the Technician role (or staff) and external contacts. Repair requests go to the ones you choose." actions={<TechnicianDialog slug={space.slug} members={candidates} />} />}
     >
       <TechniciansTable slug={space.slug} rows={rows} />
-      <div className="flex flex-col gap-4">
-        <SectionHeading title="Messages to technicians" description="Every request is emailed. Add a Telegram bot or WhatsApp Business number to message technicians there too." />
+      <CollapsibleSection id="technician-messaging" title="Messages to technicians" defaultOpen={messaging.telegram || messaging.whatsapp} description="Every request is emailed. Add a Telegram bot or WhatsApp Business number to message technicians there too.">
         <MessagingCard slug={space.slug} settings={messaging} />
-      </div>
+      </CollapsibleSection>
     </ListLayout>
   );
 }

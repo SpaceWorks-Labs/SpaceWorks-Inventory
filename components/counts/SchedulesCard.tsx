@@ -4,7 +4,8 @@ import { setCountScheduleActiveAction } from "@/app/actions/counts";
 import type { LocationOption } from "@/components/desk/LocationPicker";
 import { useActionRunner } from "@/components/desk/useActionRunner";
 import { Button } from "@/components/ui/button";
-import { Callout, Card, CardHeader, Chip } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Callout, Chip } from "@/components/ui/display";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { ScheduleDialog } from "./ScheduleDialog";
 
@@ -14,12 +15,7 @@ export type ScheduleRow = { id: string; name: string; scope: string; everyDays: 
 export function SchedulesCard({ slug, schedules, locations, categories }: { slug: string; schedules: ScheduleRow[]; locations: LocationOption[]; categories: Array<{ id: string; name: string }> }) {
   const { run, pending, error } = useActionRunner();
   return (
-    <Card as="section" aria-label="Count schedules">
-      <CardHeader
-        title="Count schedules"
-        description="Open a count automatically on a regular rhythm."
-        action={<ScheduleDialog slug={slug} locations={locations} categories={categories} />}
-      />
+    <CollapsibleCard id="count-schedules" title="Count schedules" count={schedules.length} description="Open a count automatically on a regular rhythm." action={<ScheduleDialog slug={slug} locations={locations} categories={categories} />}>
       {error ? <Callout tone="danger" role="alert" className="mb-4">{error}</Callout> : null}
       {schedules.length === 0 ? (
         <p className="rounded-lg border border-line bg-surface px-4 py-3 text-body-ui text-ink-muted">No schedules yet.</p>
@@ -61,6 +57,6 @@ export function SchedulesCard({ slug, schedules, locations, categories }: { slug
           </TBody>
         </Table>
       )}
-    </Card>
+    </CollapsibleCard>
   );
 }

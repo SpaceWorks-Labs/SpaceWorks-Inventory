@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
+import { Bell, ChevronDown, ChevronsUpDown, LogOut, Menu as MenuIcon, Moon, Sun, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { ShellData } from "@/lib/appShell";
 import { activeNavKey } from "@/lib/nav";
@@ -14,6 +14,7 @@ import { SpaceWorksLogo } from "@/components/brand/SpaceWorksLogo";
 import { useAppColorMode } from "@/components/providers";
 import { Avatar } from "@/components/ui/display";
 import { IconButton } from "@/components/ui/button";
+import { useRememberedOpen } from "@/components/ui/collapsible";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 
 function NavLink({ href, active, children, onNavigate }: { href: string; active: boolean; children: string; onNavigate?: () => void }) {
@@ -67,6 +68,7 @@ function SpaceSwitcher({ data, onNavigate }: { data: ShellData; onNavigate?: () 
 function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () => void }) {
   const { mode, toggleColorMode } = useAppColorMode();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const byPointer = useRef(false);
   const name = data.user.name ?? data.user.email;
   return (
     <Menu>
@@ -81,7 +83,16 @@ function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () =>
         </span>
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-ink-muted" />
       </MenuTrigger>
-      <MenuContent side="top" align="start" className="min-w-[232px]">
+      <MenuContent
+        side="top"
+        align="start"
+        className="min-w-[232px]"
+        onPointerDown={() => { byPointer.current = true; }}
+        onKeyDown={() => { byPointer.current = false; }}
+        // Keyboard users get focus back on the trigger; a pointer choice doesn't
+        // light up a focus ring in the middle of the colour switch.
+        onCloseAutoFocus={(event) => { if (byPointer.current) event.preventDefault(); byPointer.current = false; }}
+      >
         <MenuLabel>{name}</MenuLabel>
         <MenuItem asChild>
           <Link href="/account" onClick={onNavigate}>Account settings</Link>
@@ -94,8 +105,11 @@ function AccountMenu({ data, onNavigate }: { data: ShellData; onNavigate?: () =>
         <MenuItem
           icon={mode === "dark" ? <Sun /> : <Moon />}
           onSelect={() => {
+            // Let the menu close (and paint) first, so the snapshot the circle
+            // grows over has no open menu in it; then grow from the trigger.
             const rect = triggerRef.current?.getBoundingClientRect();
-            toggleColorMode(rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined);
+            const origin = rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined;
+            requestAnimationFrame(() => requestAnimationFrame(() => toggleColorMode(origin)));
           }}
         >
           {mode === "dark" ? "Light mode" : "Dark mode"}
@@ -119,14 +133,37 @@ function NotificationsLink({ data, onNavigate }: { data: ShellData; onNavigate?:
       aria-label={label}
       className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-ink transition-colors hover:bg-sidebar-hover"
     >
-      <span className="text-xs font-semibold">Inbox</span>
-      {/* Inline, not overlaid: an absolute badge covered the word. */}
+      <Bell aria-hidden className="size-5 shrink-0" />
+      {/* Inline, not overlaid: an absolute badge covered the bell. */}
       {count > 0 ? (
         <span aria-hidden className="min-w-5 rounded-full bg-accent-soft px-1.5 text-center text-xs font-semibold leading-5 tabular-nums text-accent-text">
           {count > 99 ? "99+" : count}
         </span>
       ) : null}
     </Link>
+  );
+}
+
+/** A labelled sidebar group that folds; the group holding the current page always shows it. */
+function NavGroup({ id, label, holdsActive, children }: { id: string; label: string; holdsActive: boolean; children: ReactNode }) {
+  const [saved, toggle] = useRememberedOpen(`swi:nav:${id}`, true);
+  const open = saved || holdsActive;
+  const listId = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={holdsActive}
+        aria-expanded={open}
+        aria-controls={listId}
+        className="flex min-h-9 items-center justify-between gap-2 rounded-md px-3 text-left text-overline text-ink-muted transition-colors hover:bg-sidebar-hover hover:text-ink disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-ink-muted"
+      >
+        {label}
+        <ChevronDown aria-hidden className={cn("size-3.5 shrink-0 transition-transform duration-[160ms] motion-reduce:transition-none", !open && "-rotate-90")} />
+      </button>
+      <div id={listId} hidden={!open} className="flex flex-col gap-1">{children}</div>
+    </div>
   );
 }
 
@@ -145,16 +182,20 @@ function SidebarContents({ data, onNavigate, headerAction }: { data: ShellData; 
         {headerAction ?? <NotificationsLink data={data} onNavigate={onNavigate} />}
       </div>
       <nav aria-label="Space" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        {data.nav.map((group) => (
-          <div key={group.key} className="flex flex-col gap-1">
-            {group.label ? <p className="px-3 pb-0.5 text-overline text-ink-muted">{group.label}</p> : null}
-            {group.items.map((item) => (
-              <NavLink key={item.key} href={item.href} active={active === item.key} onNavigate={onNavigate}>
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        ))}
+        {data.nav.map((group) => {
+          const links = group.items.map((item) => (
+            <NavLink key={item.key} href={item.href} active={active === item.key} onNavigate={onNavigate}>
+              {item.label}
+            </NavLink>
+          ));
+          return group.label ? (
+            <NavGroup key={group.key} id={group.key} label={group.label} holdsActive={group.items.some((item) => item.key === active)}>
+              {links}
+            </NavGroup>
+          ) : (
+            <div key={group.key} className="flex flex-col gap-1">{links}</div>
+          );
+        })}
       </nav>
       <div className="mt-auto pt-2">
         <AccountMenu data={data} onNavigate={onNavigate} />
@@ -191,7 +232,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
           <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
             <DialogPrimitive.Trigger asChild>
               <IconButton label="Open navigation menu">
-                <span className="text-xs font-semibold">Menu</span>
+                <MenuIcon aria-hidden className="size-5" />
               </IconButton>
             </DialogPrimitive.Trigger>
             <DialogPrimitive.Portal>
@@ -205,7 +246,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
                   headerAction={
                     <DialogPrimitive.Close asChild>
                       <IconButton label="Close navigation menu" variant="quiet">
-                        <span className="text-xs font-semibold">Close</span>
+                        <X aria-hidden className="size-5" />
                       </IconButton>
                     </DialogPrimitive.Close>
                   }

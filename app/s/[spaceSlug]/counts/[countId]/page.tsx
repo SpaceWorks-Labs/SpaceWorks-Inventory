@@ -50,7 +50,7 @@ export default async function CountPage({ params }: PageProps<"/s/[spaceSlug]/co
 
   return (
     <DetailLayout
-      back={{ href: `/s/${slug}/counts`, label: "Back to counts" }}
+      back={{ href: `/s/${slug}/counts`, label: "Counts" }}
       header={<PageHeader kicker={header.reference} title={header.name} description={header.blind ? "Blind cycle count" : "Cycle count"} actions={<CountStatusChip status={header.status} />} />}
       aside={<Card><DetailList items={facts} /></Card>}
     >

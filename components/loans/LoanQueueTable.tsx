@@ -11,7 +11,7 @@ export type LoanQueueRow = {
 /** The desk queue: the reference is the row link; status chips carry a word. */
 export function LoanQueueTable({ slug, rows, dateHeading }: { slug: string; rows: LoanQueueRow[]; dateHeading: string }) {
   return (
-    <Table label="Loans">
+    <Table long label="Loans">
       <THead>
         <TR><TH>Loan</TH><TH>Member</TH><TH>Items</TH><TH className="text-right">Units</TH><TH>{dateHeading}</TH><TH>Status</TH></TR>
       </THead>

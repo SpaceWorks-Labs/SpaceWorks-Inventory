@@ -218,6 +218,15 @@
   mask-image: radial-gradient(circle at var(--sw-reveal-x) var(--sw-reveal-y), var(--sw-ink) calc(var(--sw-reveal) - 160px), transparent var(--sw-reveal));
 }
 
+/* While the circle grows, the page under it doesn't run its own colour
+   transitions (the new mode must arrive in one step inside the circle). The
+   toggle icon keeps its cross-rotation. */
+.sw-theme-switching *:not(.sw-mode-icon),
+.sw-theme-switching *::before,
+.sw-theme-switching *::after {
+  transition: none !important;
+}
+
 /* Fallback when View Transitions aren't available: a gentle colour cross-fade. */
 .sw-theme-fade,
 .sw-theme-fade *,

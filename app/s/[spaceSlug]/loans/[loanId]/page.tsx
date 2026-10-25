@@ -91,7 +91,7 @@ export default async function LoanPage({ params, searchParams }: PageProps<"/s/[
 
   return (
     <DetailLayout
-      back={{ href: `/s/${slug}/loans`, label: "Back to loans" }}
+      back={{ href: `/s/${slug}/loans`, label: "Loans" }}
       header={<PageHeader kicker="Loan" title={<span className="flex flex-wrap items-center gap-3">{reference}<LoanStatusChip status={status} overdue={overdue} /></span>} description={`${loan.borrower.name} · ${facts.summary}`} />}
       aside={
         <div className="flex flex-col gap-6">

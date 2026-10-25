@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2, Info, TriangleAlert as XCircle } from "lucide-react";
+import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2, Info, TriangleAlert as XCircle, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type Severity = "success" | "error" | "info" | "warning";
@@ -87,7 +87,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 </button>
               ) : null}
               <button type="button" onClick={dismiss} aria-label="Dismiss" className="inline-flex size-11 shrink-0 items-center justify-center rounded-md hover:bg-muted hover:text-ink">
-                <span aria-hidden="true" className="inline-flex items-center justify-center text-xs font-semibold">×</span>
+                <X aria-hidden className="size-4" />
               </button>
             </div>
           ) : null}

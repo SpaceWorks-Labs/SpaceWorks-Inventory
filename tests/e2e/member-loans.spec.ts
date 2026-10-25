@@ -21,7 +21,7 @@ test("a member sends a catalogue request and finds it under my loans", async ({ 
   await expect(page.getByText("Ready to collect. Come to the desk; staff scan and photograph the items as they hand them over.", { exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "Loan items", exact: true })).toContainText("Safety goggles");
   await expect(page.getByRole("region", { name: "Details", exact: true }).getByText(purpose, { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: /Back to my loans$/ }).click();
+  await page.getByRole("main").getByRole("link", { name: "My loans", exact: true }).click();
   await expect(page.getByRole("heading", { name: "My loans", level: 1 })).toBeVisible();
   const row = page.getByRole("row").filter({ has: page.getByRole("link", { name: reference, exact: true }) });
   await expect(row).toContainText("Safety goggles");

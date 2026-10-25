@@ -1,5 +1,5 @@
 // Generated transport DTOs. No backend imports.
-// Source SHA256: ba1ed013401d7c9e0dddb7def46c3ab1e3e582e1dbb45d5e802a14f08e4b8806
+// Source SHA256: 5749846c8f12359f22cb2b2e8f41ef938240ba1134f581443d8fbd0852500609
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 export type Views = {
 "account-page:loadAccountPage": { "user": { "email": string; "name": null | string; "phone": null | string; "mfaEnabledAt": null | Date }; "spaces": Array<{ "id": string; "slug": string; "name": string; "role": "MANAGER" | "STAFF" | "MEMBER" | "TECHNICIAN" }>; "remaining": number; "hasPassword": boolean };

@@ -5,7 +5,8 @@ import type { PayoutMethod } from "@prisma/client";
 import { approveRepairAmountAction, recordRepairPayoutAction } from "@/app/actions/repairs";
 import { useActionRunner } from "@/components/desk/useActionRunner";
 import { Button } from "@/components/ui/button";
-import { Callout, Card, CardHeader, DetailList } from "@/components/ui/display";
+import { CollapsibleCard } from "@/components/ui/collapsible";
+import { Callout, DetailList } from "@/components/ui/display";
 import { Field, Input } from "@/components/ui/field";
 import { Dropdown } from "@/components/ui/select";
 import { PAYOUT_METHODS, PAYOUT_METHOD_LABEL } from "@/lib/finance/labels";
@@ -33,12 +34,12 @@ export function MoneyPanel({ slug, currency, repair, pay }: { slug: string; curr
   const [paidOn, setPaidOn] = useState(today());
   const { run, pending, error } = useActionRunner();
   const issueId = repair.id;
-  const canApprove = pay && (repair.status === "FIXED" || repair.status === "CLOSED") && repair.technician;
+  // Once it is paid in full there is nothing left to approve.
+  const canApprove = pay && (repair.status === "FIXED" || repair.status === "CLOSED") && repair.technician && money.payout !== "PAID";
   const canPay = pay && money.approvedMinor !== null && left > 0 && repair.status !== "CANCELLED";
 
   return (
-    <Card as="section" aria-label="Payment">
-      <CardHeader title="Payment" titleAs="h2" />
+    <CollapsibleCard id="repair-payment" title="Payment">
       <div className="flex flex-col gap-4">
         <DetailList
           items={[
@@ -75,6 +76,6 @@ export function MoneyPanel({ slug, currency, repair, pay }: { slug: string; curr
         ) : null}
         {error ? <Callout tone="danger" role="alert">{error}</Callout> : null}
       </div>
-    </Card>
+    </CollapsibleCard>
   );
 }
