@@ -165,5 +165,5 @@ lending desk for makerspaces, with several makerspaces on one install.
   DigitalOcean App Platform spec, a Cloudflare cron Worker, and multi-arch
   backend and frontend images on GitHub Packages.
 
-[Unreleased]: https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/commits/dev
-[0.1.0]: https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/releases
+[Unreleased]: https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/commits/dev
+[0.1.0]: https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/releases

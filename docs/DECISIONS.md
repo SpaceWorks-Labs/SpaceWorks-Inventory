@@ -12,17 +12,17 @@ conservatively during the build and the owner may revisit them.
 
 Space Works is a family of self-hosted, open-source (AGPL-3.0-or-later) tools
 for makerspaces and communities under the
-[SpaceWorks-HQ](https://github.com/SpaceWorks-HQ) organisation. On 2026-10-23
-three areas of the original [SpaceWorks](https://github.com/SpaceWorks-HQ/SpaceWorks)
+[SpaceWorks-Labs](https://github.com/SpaceWorks-Labs) organisation. On 2026-10-23
+three areas of the original [SpaceWorks](https://github.com/SpaceWorks-Labs/SpaceWorks)
 (Django + React) app were split into standalone apps:
-[Inventory](https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory) (this repo:
+[Inventory](https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory) (this repo:
 stock room and lending desk),
-[Machines](https://github.com/SpaceWorks-HQ/SpaceWorks-Machines) and
-[Bookings](https://github.com/SpaceWorks-HQ/SpaceWorks-Bookings).
-[SpaceWorks-Events](https://github.com/SpaceWorks-HQ/SpaceWorks-Events) and
-[SpaceWorks-Workspace](https://github.com/SpaceWorks-HQ/SpaceWorks-Workspace)
+[Machines](https://github.com/SpaceWorks-Labs/SpaceWorks-Machines) and
+[Bookings](https://github.com/SpaceWorks-Labs/SpaceWorks-Bookings).
+[SpaceWorks-Events](https://github.com/SpaceWorks-Labs/SpaceWorks-Events) and
+[SpaceWorks-Workspace](https://github.com/SpaceWorks-Labs/SpaceWorks-Workspace)
 are the reference for structure, install and deploy; brand and UI rules come
-only from [SpaceWorks-Design](https://spaceworks-hq.github.io/SpaceWorks-Design/).
+only from [SpaceWorks-Design](https://spaceworks-labs.github.io/SpaceWorks-Design/).
 
 ## Locked at the split (2026-10-23)
 

@@ -26,10 +26,10 @@ to members with a QR scan and a photo at every handover, count stock, and move i
 between makerspaces, all on infrastructure you control. One installation runs several makerspaces,
 each with its own members, roles, settings and audit trail. It is fully standalone; its REST API and
 signed webhooks connect it to the other Space Works apps
-([Events](https://github.com/SpaceWorks-HQ/SpaceWorks-Events),
-[Workspace](https://github.com/SpaceWorks-HQ/SpaceWorks-Workspace),
-[Bookings](https://github.com/SpaceWorks-HQ/SpaceWorks-Bookings),
-[Machines](https://github.com/SpaceWorks-HQ/SpaceWorks-Machines)) or anything else, whenever you want.
+([Events](https://github.com/SpaceWorks-Labs/SpaceWorks-Events),
+[Workspace](https://github.com/SpaceWorks-Labs/SpaceWorks-Workspace),
+[Bookings](https://github.com/SpaceWorks-Labs/SpaceWorks-Bookings),
+[Machines](https://github.com/SpaceWorks-Labs/SpaceWorks-Machines)) or anything else, whenever you want.
 
 ## What you can do
 
@@ -140,7 +140,7 @@ On a 64-bit Linux server (Ubuntu/Debian, Fedora/RHEL/Alma/Rocky, Arch or openSUS
 with `sudo`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpaceWorks-HQ/SpaceWorks-Inventory/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SpaceWorks-Labs/SpaceWorks-Inventory/main/install.sh | bash
 ```
 
 While the repository is private, give the installer a GitHub token that can read the repository and
@@ -148,7 +148,7 @@ its packages (it downloads the release and logs in to GitHub Packages with it):
 
 ```bash
 export SWI_GITHUB_TOKEN=<token> SWI_GITHUB_USER=<your-github-username>
-curl -fsSL -H "Authorization: Bearer $SWI_GITHUB_TOKEN" https://raw.githubusercontent.com/SpaceWorks-HQ/SpaceWorks-Inventory/main/install.sh | bash
+curl -fsSL -H "Authorization: Bearer $SWI_GITHUB_TOKEN" https://raw.githubusercontent.com/SpaceWorks-Labs/SpaceWorks-Inventory/main/install.sh | bash
 ```
 
 It checks the server and asks every question first: the layout (website and API containers on two
@@ -218,7 +218,7 @@ flowchart LR
 ```
 
 <p>
-  <a href="https://render.com/deploy?repo=https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory">
+  <a href="https://render.com/deploy?repo=https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory">
     <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" />
   </a>
 </p>
@@ -256,7 +256,7 @@ development emails (magic links, invitations) are written to `.data/mail/`.
 
 ## Design system
 
-Space Works Inventory follows the [Space Works design system](https://spaceworks-hq.github.io/SpaceWorks-Design/):
+Space Works Inventory follows the [Space Works design system](https://spaceworks-labs.github.io/SpaceWorks-Design/):
 neutral first, accent second, and one bold moment per layout.
 
 | | Colour | Hex | Used for |
@@ -317,7 +317,7 @@ npm run readme:art           # README banner and colour swatches
 
 Bug reports, ideas and pull requests are all welcome.
 
-- [Report a bug](https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory/issues/new) or open a pull request.
+- [Report a bug](https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory/issues/new) or open a pull request.
 - Branch from `dev` and open your pull request against `dev`, the integration branch. `main` is
   production; only [@Shaan-Shoukath](https://github.com/Shaan-Shoukath) merges to it.
 - Found a security issue? Follow [SECURITY.md](SECURITY.md) and report it privately.
@@ -329,14 +329,14 @@ availability module, state changes in the workflow modules, and tenant and role 
 
 Made by **Space Works**, a maker community that started inside TinkerSpace Kochi.
 
-- **Domain.** Ported (not copied) from the original [SpaceWorks](https://github.com/SpaceWorks-HQ/SpaceWorks)
+- **Domain.** Ported (not copied) from the original [SpaceWorks](https://github.com/SpaceWorks-Labs/SpaceWorks)
   makerspace manager's inventory, lending and transfer apps.
 - **Platform.** The deployment and infrastructure code, background jobs and split-frontend gateway are
-  adapted from [Space Works Workspace](https://github.com/SpaceWorks-HQ/SpaceWorks-Workspace) (see
+  adapted from [Space Works Workspace](https://github.com/SpaceWorks-Labs/SpaceWorks-Workspace) (see
   [NOTICE](NOTICE)); the colour-mode reveal and Patch's walk on the 404 page come from
-  [Space Works Events](https://github.com/SpaceWorks-HQ/SpaceWorks-Events).
+  [Space Works Events](https://github.com/SpaceWorks-Labs/SpaceWorks-Events).
 - **Brand.** The Space Works identity, Patch and the README art come from the
-  [Space Works design system](https://github.com/SpaceWorks-HQ/SpaceWorks-Design).
+  [Space Works design system](https://github.com/SpaceWorks-Labs/SpaceWorks-Design).
 - **Fonts.** Gilroy by Radomir Tinkov, and [Unbounded](https://github.com/googlefonts/unbounded) by the
   Unbounded Project Authors under the SIL Open Font License 1.1.
 

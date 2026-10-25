@@ -9,7 +9,7 @@ only a private container port.
 
 ## Images and runtime
 
-Pull an immutable `ghcr.io/spaceworks-hq/spaceworks-inventory-backend:<release>`
+Pull an immutable `ghcr.io/spaceworks-labs/spaceworks-inventory-backend:<release>`
 (while the packages are private, `docker login ghcr.io` first with a classic
 token that has `read:packages`). It serves the whole application by default.
 Run `migrate` once before the web rollout using an administration connection.
@@ -18,7 +18,7 @@ Redis and custom S3 endpoints.
 
 ```bash
 export SWI_VERSION=0.1.0-main.42.a1b2c3d4e5f6
-image="ghcr.io/spaceworks-hq/spaceworks-inventory-backend:$SWI_VERSION"
+image="ghcr.io/spaceworks-labs/spaceworks-inventory-backend:$SWI_VERSION"
 docker pull "$image"
 docker run --rm --env-file /secure/swi-migration.env "$image" migrate
 docker run -d --name spaceworks-inventory --restart unless-stopped \

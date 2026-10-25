@@ -48,7 +48,7 @@ server.
 As root or a user with `sudo`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpaceWorks-HQ/SpaceWorks-Inventory/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SpaceWorks-Labs/SpaceWorks-Inventory/main/install.sh | bash
 ```
 
 While the repository is private, this public URL answers 404: use
@@ -113,17 +113,17 @@ these work:
 
 ```bash
 # 1. GitHub CLI, if it is installed and signed in on the server:
-gh api repos/SpaceWorks-HQ/SpaceWorks-Inventory/contents/install.sh \
+gh api repos/SpaceWorks-Labs/SpaceWorks-Inventory/contents/install.sh \
   -H "Accept: application/vnd.github.raw" | bash
 
 # 2. curl, with the header read from stdin so the token stays out of the process list:
 printf 'header = "Authorization: Bearer %s"\n' "$SWI_GITHUB_TOKEN" | \
-  curl --config - -fsSL https://raw.githubusercontent.com/SpaceWorks-HQ/SpaceWorks-Inventory/main/install.sh -o /tmp/swi-install.sh
+  curl --config - -fsSL https://raw.githubusercontent.com/SpaceWorks-Labs/SpaceWorks-Inventory/main/install.sh -o /tmp/swi-install.sh
 bash /tmp/swi-install.sh && rm -f /tmp/swi-install.sh
 
 # 3. The short form (the token is briefly visible to other users of this host in `ps`):
 curl -fsSL -H "Authorization: Bearer $SWI_GITHUB_TOKEN" \
-  https://raw.githubusercontent.com/SpaceWorks-HQ/SpaceWorks-Inventory/main/install.sh | bash
+  https://raw.githubusercontent.com/SpaceWorks-Labs/SpaceWorks-Inventory/main/install.sh | bash
 ```
 
 Because the token is exported, `bash` inherits it; there is no need to repeat
@@ -288,7 +288,7 @@ Use a new version label for every build. Build images locally below, or use a
 trusted build host and transfer the same versioned images to the VPS.
 
 ```bash
-git clone https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory.git
+git clone https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory.git
 cd SpaceWorks-Inventory
 git checkout <reviewed-commit-or-tag>
 SWI_VERSION="vps-$(git rev-parse --short=12 HEAD)"
@@ -532,10 +532,10 @@ backup=/root/<time>
 version=$(cat "$backup/version")   # a release such as 0.1.0-main.42.<commit>, or vps-<commit>
 case "$version" in vps-*) ref=${version#vps-} ;; *) ref=v$version ;; esac
 commit=$(curl -fsSL -H 'Accept: application/vnd.github.sha' \
-  "https://api.github.com/repos/SpaceWorks-HQ/SpaceWorks-Inventory/commits/$ref")
+  "https://api.github.com/repos/SpaceWorks-Labs/SpaceWorks-Inventory/commits/$ref")
 release=/opt/spaceworks-inventory/releases/$commit
 mkdir -p "$release"
-curl -fsSL "https://codeload.github.com/SpaceWorks-HQ/SpaceWorks-Inventory/tar.gz/$commit" | tar -xz -C "$release" --strip-components=1
+curl -fsSL "https://codeload.github.com/SpaceWorks-Labs/SpaceWorks-Inventory/tar.gz/$commit" | tar -xz -C "$release" --strip-components=1
 echo "$commit" > "$release/.release"
 case "$version" in vps-*) ;; *) echo "$version" > "$release/.release-version" ;; esac
 install -d -m 0700 /etc/spaceworks-inventory

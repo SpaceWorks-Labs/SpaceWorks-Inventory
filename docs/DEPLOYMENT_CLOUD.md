@@ -20,14 +20,14 @@ complete stack through the [installer](DEPLOYMENT_VPS.md).
 
 ## One-click deploy on Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory)
 
 The button opens Render's Blueprint flow for
-`https://github.com/SpaceWorks-HQ/SpaceWorks-Inventory` and reads `render.yaml`
+`https://github.com/SpaceWorks-Labs/SpaceWorks-Inventory` and reads `render.yaml`
 from the default branch. **While the repository is private**, Render can only
 read it through GitHub: in Render, connect your GitHub account (**Account
 settings → Git providers**) and grant the Render GitHub app access to the
-`SpaceWorks-HQ/SpaceWorks-Inventory` repository (or to your fork), then use
+`SpaceWorks-Labs/SpaceWorks-Inventory` repository (or to your fork), then use
 **New → Blueprint** and pick the repository. The button alone fails for a
 repository Render cannot see.
 
