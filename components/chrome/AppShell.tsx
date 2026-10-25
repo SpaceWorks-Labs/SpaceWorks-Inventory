@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
+import { Bell, ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { ShellData } from "@/lib/appShell";
 import { activeNavKey } from "@/lib/nav";
@@ -119,8 +119,8 @@ function NotificationsLink({ data, onNavigate }: { data: ShellData; onNavigate?:
       aria-label={label}
       className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-ink transition-colors hover:bg-sidebar-hover"
     >
-      <span className="text-xs font-semibold">Inbox</span>
-      {/* Inline, not overlaid: an absolute badge covered the word. */}
+      <Bell aria-hidden className="size-5 shrink-0" />
+      {/* Inline, not overlaid: an absolute badge covered the bell. */}
       {count > 0 ? (
         <span aria-hidden className="min-w-5 rounded-full bg-accent-soft px-1.5 text-center text-xs font-semibold leading-5 tabular-nums text-accent-text">
           {count > 99 ? "99+" : count}
