@@ -114,12 +114,12 @@ shows light mode; every screen is also in dark mode as `<name>-dark.webp` in
 
 | | |
 | --- | --- |
-| <img src="docs/screenshots/home.webp" alt="Space home with the desk queue, transfers and recent stock movements"><br>**Space home**: the desk queue, transfers in and out, low stock | <img src="docs/screenshots/loan-issue.webp" alt="Handing over a loan: a step-by-step flow that starts with scanning each label"><br>**Hand over a loan**: scan, check the lines, photos and remarks |
+| <img src="docs/screenshots/home.webp" alt="Space home with the desk queue, transfers and recent stock movements"><br>**Space home**: desk queues that fold away, transfers, low stock and the bell for notifications | <img src="docs/screenshots/loan-issue.webp" alt="Handing over a loan: a step-by-step flow that starts with scanning each label"><br>**Hand over a loan**: scan, check the lines, photos and remarks |
 | <img src="docs/screenshots/catalogue.webp" alt="Member catalogue with availability and a request tray"><br>**Borrow**: members browse and send a request | <img src="docs/screenshots/loans.webp" alt="Loans queue for the lending desk"><br>**Loans**: requests, ready to collect, on loan and overdue |
 | <img src="docs/screenshots/stock.webp" alt="Stock by location with on hand, held and on loan"><br>**Stock**: on hand, held and on loan per shelf | <img src="docs/screenshots/transfer.webp" alt="A transfer between spaces in transit with its timeline"><br>**Transfers** between shelves and between spaces |
 | <img src="docs/screenshots/counts.webp" alt="Cycle counts list"><br>**Cycle counts** with blind counting and variances | <img src="docs/screenshots/reports.webp" alt="Reports with valuation, lending and exports"><br>**Reports** with CSV and Excel exports |
 | <img src="docs/screenshots/repairs.webp" alt="Repairs list with status, technician and payout"><br>**Repairs**: report, send to technicians, verify and pay | <img src="docs/screenshots/finance.webp" alt="Finance page with money in, out and net by month and category"><br>**Finance**: every payment, refund, payout and purchase in one ledger |
-| <img src="docs/screenshots/item.webp" alt="Item page with stock per location and QR code"><br>**Item**: stock per shelf, assets and its QR label | <img src="docs/screenshots/scan-phone.webp" alt="Scanning a label on a phone" width="260"><br>**Scan** any label from a phone |
+| <img src="docs/screenshots/item.webp" alt="Item page with stock per location and QR code"><br>**Item**: stock per shelf, assets and its QR label, each section folds | <img src="docs/screenshots/scan-phone.webp" alt="Scanning a label on a phone" width="260"><br>**Scan** any label from a phone |
 
 More: [items](docs/screenshots/items.webp), [locations](docs/screenshots/locations.webp),
 [my loans](docs/screenshots/my-loans.webp), [members](docs/screenshots/members.webp),
