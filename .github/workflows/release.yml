@@ -113,8 +113,12 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Version $version (GitHub Release: $release, pre-release: $prerelease)"
 
+  # The quality job is skipped on main (the workflow_run gate already passed), and
+  # a skipped job skips everything downstream by default, so each later job says
+  # explicitly that it follows a successful previous step.
   build:
     needs: prepare
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
     strategy:
       fail-fast: true
       matrix:
@@ -211,6 +215,7 @@ jobs:
 
   publish:
     needs: [prepare, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -259,7 +264,7 @@ jobs:
 
   github-release:
     needs: [prepare, publish]
-    if: needs.prepare.outputs.release == 'true'
+    if: ${{ !cancelled() && needs.publish.result == 'success' && needs.prepare.outputs.release == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -318,6 +323,7 @@ jobs:
   deploy:
     needs: [prepare, github-release]
     if: >-
+      !cancelled() && needs.github-release.result == 'success' &&
       needs.github-release.outputs.created == 'true' &&
       needs.prepare.outputs.prerelease == 'false' &&
       vars.SWI_DEPLOY == 'true'
@@ -337,6 +343,7 @@ jobs:
 
   retention:
     needs: [prepare, publish]
+    if: ${{ !cancelled() && needs.publish.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
