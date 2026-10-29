@@ -32,6 +32,7 @@ it("cleans only its restrictive public fixture when an actual installer build fa
   const bash = process.platform === "win32" && existsSync(windowsBash) ? windowsBash : "bash";
   try {
     mkdirSync(scripts); mkdirSync(publicDir); mkdirSync(path.join(fixture, "tmp"));
+    mkdirSync(path.join(fixture, "docker/vps"), { recursive: true });
     cpSync(path.join(process.cwd(), "scripts/test-vps-install.sh"), path.join(scripts, "test-vps-install.sh"));
     const existing = path.join(publicDir, "existing.txt");
     writeFileSync(existing, "existing checkout asset", { mode: 0o640 });
@@ -40,9 +41,11 @@ it("cleans only its restrictive public fixture when an actual installer build fa
 docker() {
   if [[ "$1" = build ]]; then
     probe=$(find "$PWD/public" -mindepth 1 -maxdepth 1 -type d -name 'audit-permissions.*')
-    [[ -n "$probe" ]] || return 91
+    scripts_probe=$(find "$PWD/scripts" -maxdepth 1 -type f -name 'audit-permissions.*.mjs')
+    vps_probe=$(find "$PWD/docker/vps" -mindepth 1 -maxdepth 1 -type d -name 'audit-permissions.*')
+    [[ -n "$probe" && -n "$scripts_probe" && -n "$vps_probe" ]] || return 91
     cat "$probe/nested/readable.txt" > "$PROBE_CONTENT_LOG"
-    stat -c '%a' "$probe" "$probe/nested" "$probe/nested/readable.txt" > "$PROBE_MODE_LOG"
+    stat -c '%a' "$probe" "$probe/nested" "$probe/nested/readable.txt" "$scripts_probe" "$vps_probe" "$vps_probe/readable.mjs" > "$PROBE_MODE_LOG"
     return 23
   fi
 }
@@ -67,10 +70,12 @@ exec "$BASH" scripts/test-vps-install.sh
     expect(result.error).toBeUndefined();
     expect(result.status, result.stderr).toBe(23);
     expect(readFileSync(path.join(fixture, "content.log"), "utf8")).toBe("inventory-public-permission-fixture\n");
-    if (process.platform !== "win32") expect(readFileSync(path.join(fixture, "modes.log"), "utf8").trim().split("\n")).toEqual(["700", "700", "600"]);
+    if (process.platform !== "win32") expect(readFileSync(path.join(fixture, "modes.log"), "utf8").trim().split("\n")).toEqual(["700", "700", "600", "600", "700", "600"]);
     expect(readdirSync(publicDir)).toEqual(["existing.txt"]);
     expect(readFileSync(existing, "utf8")).toBe("existing checkout asset");
     expect(statSync(existing).mode).toBe(mode);
+    expect(readdirSync(scripts)).toEqual(["test-vps-install.sh"]);
+    expect(readdirSync(path.join(fixture, "docker/vps"))).toEqual([]);
     expect(readdirSync(path.join(fixture, "tmp"))).toEqual([]);
   } finally { rmSync(fixture, { recursive: true, force: true }); }
 }, 25_000);

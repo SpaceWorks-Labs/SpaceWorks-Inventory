@@ -13,6 +13,7 @@ build is tagged `v<version>-main.<run>.<commit>`; see
 ### Fixed
 
 - Preserve public asset access for the nonroot backend when installation files use private directory and file modes.
+- Preserve nonroot access to directly copied operator scripts and verify private script/directory modes in the image fixture.
 - Pass explicit nonsecret installer fixture coordinates through environment-clearing sudo implementations.
 - Update the independent Cloudflare cron tooling lockfile and audit its dependencies and credential-free bundle separately in CI.
 - Stage private PostgreSQL bootstrap inputs for its service user and prevent an encrypted-backup output creation race.

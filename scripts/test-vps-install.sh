@@ -19,6 +19,8 @@ cleanup() {
   fi
   [[ ! -f "$SWI_CONFIG_DIR/compose.env" ]] || as_root sh scripts/vps-compose.sh down --volumes --remove-orphans >/dev/null 2>&1 || true
   [[ -z ${public_probe:-} ]] || rm -rf -- "$public_probe"
+  [[ -z ${scripts_probe:-} ]] || rm -f -- "$scripts_probe"
+  [[ -z ${vps_probe:-} ]] || rm -rf -- "$vps_probe"
   as_root rm -rf -- "$work"
 }
 trap cleanup EXIT
@@ -36,12 +38,20 @@ mkdir -m 700 "$SWI_CONFIG_DIR"
 public_probe=$(mktemp -d "$root/public/audit-permissions.XXXXXX")
 mkdir -m 700 "$public_probe/nested"
 (umask 077; printf 'inventory-public-permission-fixture\n' > "$public_probe/nested/readable.txt")
+scripts_probe=$(mktemp "$root/scripts/audit-permissions.XXXXXX.mjs")
+vps_probe=$(mktemp -d "$root/docker/vps/audit-permissions.XXXXXX")
+(umask 077
+  printf 'export default "inventory-script-permission-fixture";\n' > "$scripts_probe"
+  printf 'export default "inventory-operator-permission-fixture";\n' > "$vps_probe/readable.mjs")
 export SWI_BUILD_KEY
 SWI_BUILD_KEY=$(openssl rand -base64 32)
 docker build --target runner --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid -t swi-backend:smoke .
 # The default serving user must retain access without relaxing the private modes.
-docker run --rm --network none --entrypoint node -e SWI_PUBLIC_PERMISSION_PROBE="${public_probe#"$root/"}" swi-backend:smoke -e '
+docker run --rm --network none --entrypoint node \
+  -e SWI_PUBLIC_PERMISSION_PROBE="${public_probe#"$root/"}" \
+  -e SWI_SCRIPT_PERMISSION_PROBE="${scripts_probe#"$root/"}" \
+  -e SWI_VPS_PERMISSION_PROBE="${vps_probe#"$root/"}/readable.mjs" swi-backend:smoke -e '
 const assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path");
 const probe = path.join("/app", process.env.SWI_PUBLIC_PERMISSION_PROBE);
 assert.equal(process.getuid(), 1001);
@@ -53,7 +63,17 @@ for (const directory of [probe, path.join(probe, "nested")]) {
 const asset = path.join(probe, "nested/readable.txt");
 assert.equal(fs.statSync(asset).mode & 0o777, 0o600);
 assert.equal(fs.readFileSync(asset, "utf8"), "inventory-public-permission-fixture\n");
-console.log("Nonroot backend read private-mode public directories and asset.");
+for (const [name, expected] of [["SWI_SCRIPT_PERMISSION_PROBE", "script"], ["SWI_VPS_PERMISSION_PROBE", "operator"]]) {
+  const file = path.join("/app", process.env[name]);
+  assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+  assert.equal(fs.statSync(file).uid, 1001);
+  assert.equal(fs.readFileSync(file, "utf8"), `export default "inventory-${expected}-permission-fixture";\n`);
+}
+const operatorDirectory = path.dirname(path.join("/app", process.env.SWI_VPS_PERMISSION_PROBE));
+assert.equal(fs.statSync(operatorDirectory).mode & 0o777, 0o700);
+assert.equal(fs.statSync(operatorDirectory).uid, 1001);
+fs.readdirSync(operatorDirectory);
+console.log("Nonroot backend read private-mode public assets, scripts and operator directory.");
 '
 docker build --target frontend --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid \
