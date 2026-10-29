@@ -5,15 +5,20 @@
 This is a bounded source, integration, browser and deployment review of the
 standalone Space Works Inventory repository, with the other products audited
 separately. Verified security, lending and accessibility defects were fixed.
-Version **0.6.0** is prepared at the user's direction on the audit feature
-branch. The complete Linux application suites and packaged clean-stack results
-below describe the preceding **0.5.1 functional baseline**. Both layouts, real
-queued STARTTLS email before/after recovery, empty-volume encrypted recovery,
-private objects, usable restored keys and complete schema replacement passed.
-The subsequent 0.6.0 update fixes public-asset ownership in the nonroot backend
-and adds an actual private-mode asset image assertion. Final 0.6.0 native image,
-installer/recovery, image scans and new-head CI are pending; the older image IDs
-and scan evidence are retained as historical proof. No deployment was performed.
+Version **0.6.0** passed the available Linux suites and local clean-stack
+acceptance. Both layouts, real queued STARTTLS email before/after recovery,
+empty-volume encrypted recovery, private objects, usable restored keys and
+complete schema replacement passed. Final backend/frontend image scans report
+zero OS/library findings; shared service findings and applicability limits
+remain documented below. Native application compilation is pinned to
+`7d37829`; the subsequent `07ae15c` changes only runtime copy ownership and CI
+fixtures/documentation. Its corrected backend was verified through the
+explicit runtime-only derivation and fresh-stack recovery described below.
+This is not represented as another local Next.js compilation of that follow-up.
+The exact ownership follow-up independently passed all eight CI jobs, including
+a complete fresh Dockerfile build, private operator probes and recovery.
+Historical 0.5.1 evidence remains labelled separately. No live deployment was
+performed by this audit agent.
 This report does not certify the absence of other defects or replace validation
 of a real host, public DNS, external providers, load and operational ownership.
 
@@ -43,7 +48,7 @@ Playwright guides were consulted before framework-related verification.
 | High; recovery correctness | Both VPS and alternate database CLI used `pg_restore --clean`, which removes only objects present in the archive. Newer-release tables absent from an older backup survived recovery. A direct producer pipe could also apply a valid truncated prefix after archive generation failed. | Stage the complete SQL privately before applying one transaction that replaces `public`. VPS restore retains archive schema ACL/comments and narrow runtime/default grants; the generic CLI preserves `--no-owner --no-privileges` and refuses other user schemas. Seven helper/source-execution regressions and four actual PostgreSQL 16 generic-CLI scenarios passed. Actual encrypted VPS recovery explicitly creates and then verifies removal of a target-only table. |
 | High; failed recovery availability | Cleanup restarted the deployment after a database commit even when object restoration, migrations or readiness failed, potentially serving recovered rows against incomplete files. | Track successful SQL commit. Before commit, rollback failures may restart the previous deployment; after commit, stop all serving processes (including any partially restarted ones), keep the site offline and instruct the operator to repair and retry the full restore. Six actual cleanup-function phase regressions passed in Inventory and independently against Workspace source, including object/migration/readiness failures. |
 | Low; lifecycle correctness | Switching from split to single left the inactive profiled frontend container behind, so ordinary teardown did not fully remove the prior layout. | `vps-compose.sh down` selects all profiles. An actual shell-selection regression and final clean-stack teardown passed; no final split frontend or deployment service remains. |
-| Low | `SECURITY.md` documented an unreleased 0.1 release line and obsolete owner/admin tenant roles. | Align security policy with 0.5 and the authoritative manager/staff/member/technician model. |
+| Low | `SECURITY.md` documented an unreleased 0.1 release line and obsolete owner/admin tenant roles. | Align security policy with 0.6 and the authoritative manager/staff/member/technician model. |
 | Medium | Local quickstart configured Redis but started only the Next.js process, leaving the BullMQ outbox and schedules unprocessed. Mailpit existed in Compose but SMTP defaults were blank; local Redis had no durable job volume. | Add a cross-platform `dev:stack` supervisor, wire `local.sh` to web/worker/beat, use separate loopback worker health ports, drain workers with IPC/signals before stopping Docker, and stop siblings when a child fails. Add loopback-only PostgreSQL/direct/Redis/S3/SMTP checks before local migrations. Enable local Redis append-only persistence/noeviction and configure local-only Mailpit capture defaults. Eleven launcher/guard tests, targeted lint/types and ShellCheck passed. |
 
 ## Version 0.6.0 follow-up
@@ -70,12 +75,20 @@ Focused follow-up verification: **11 tests in two files passed**, focused
 ESLint, Bash syntax and ShellCheck passed. Separate disposable Linux execution
 of the actual harness confirms 0700/0700/0600 probe modes, cleanup after a
 build failure, unchanged existing asset contents/modes, and correct minimal
-environment handoff through an environment-clearing fake sudo. The final
-container assertion will verify UID 1001 can enumerate/read those packaged
-assets; it is not yet claimed as executed for 0.6.0.
+environment handoff through an environment-clearing fake sudo. The actual
+0.6.0 container assertion subsequently passed: UID 1001 enumerates and reads
+the packaged private-mode assets. The earlier Windows Git Bash focused rerun
+encountered two child-process timeouts during contention; the final three
+affected Linux tests passed in 1.90 seconds without relaxing their assertions.
 
-The earlier 0.5.1 image/source/restore evidence below remains historical. Final
-0.6.0 native images/recovery/scans and new-head CI remain pending before merge.
+The same private-mode class affected directly copied `scripts/*.mjs` and
+`docker/vps` sources. Both copies now use explicit `nextjs:nodejs` ownership.
+The CI fixture adds only new owned 0600 scripts and a nested 0700 operator
+directory with a 0600 module, then verifies UID 1001 ownership, exact private
+modes, enumeration and contents. It does not assert a private mode on the
+shared parent directory, whose metadata Docker can update during a later copy.
+Cleanup regressions verify all new fixtures are removed after a failed build
+without changing existing checkout files.
 
 The independent `deploy/cloudflare-cron/package-lock.json` was also audited
 separately. The root audit does not include this auxiliary deployment package.
@@ -109,7 +122,64 @@ directory metadata. A deterministic checkpoint regression reproduces the prior
 `file changed as we read it` failure and passes with the actual precreation
 step. The actual age pipeline also passed checkpoint injection, decryption and
 byte comparison (`inventory/v060/backup-encrypted-race-proof.log`). Tar errors
-remain fatal. The final 0.6.0 full clean-stack drill remains pending below.
+remain fatal. Both the full 0.6.0 native drill and the ownership-corrected
+runtime recovery drill subsequently passed.
+
+## Final 0.6.0 acceptance
+
+The actual source build at `7d3782960211aada9499c2c5855f0250e569d8bd`
+passed backend compilation/types/static generation and the frontend
+contract/types/build/boundary checks. Its exact checked-in two-image installer,
+private public-asset and PostgreSQL probes, both layouts, real queued STARTTLS
+delivery and age-encrypted recovery passed at **2026-10-29 21:19:43 UTC**.
+
+The ownership follow-up is `07ae15ca78614bd8caf5cabde8927c38f73e3eee`.
+Git-tree and complete sanitized source-archive comparisons found changes only
+in `Dockerfile`, the CI installer fixture, its existing unit test and the
+changelog, plus generated `.release` metadata. All other source bytes/modes
+match. Both archives were independently checked against every Git-tracked path:
+**1,067 of 1,067 files present, zero omissions or extras** (apart from generated
+release metadata). `inventory/v060/source-coverage.json` records that check.
+Build-instruction comparison permits only the two final runtime COPY
+ownership changes. The application Git-tree hash is
+`97819092af86ebbdf5e49650c99099a42cc9b89e817068ae467020859062fc29`;
+the corresponding sanitized application input hash is
+`c27d81579a2be0607120ef65ca8be92ba3d45c184f0037c070c48950a461aa08`.
+
+Local verification reuses the compiled application image above, applies only
+those two direct `COPY --chown` operations and restores the default user. All
+base filesystem layers remain unchanged, with exactly two added COPY layers;
+the frontend image is unchanged. The actual private script/operator assertions
+passed as UID 1001. The checked-in installer configuration/recovery tail then
+passed again with a fresh project/configuration and empty database/object
+volumes at **2026-10-29 21:34:40 UTC**. This is explicitly runtime-only reuse,
+not a fresh local Next.js compilation of the ownership follow-up. Exact recipe,
+base ID, source equivalence, layer proof, deployed image IDs and logs are in
+`inventory/v060/runtime-only/` outside the repository. CI must independently
+build and test the complete committed Dockerfile: all eight jobs for `07ae15c`
+subsequently passed, including that fresh build and recovery. The final
+documentation commit still requires its own checks before merge.
+
+| Final gate | Result and evidence |
+| --- | --- |
+| Available application CI | All **8 jobs passed** for both `7d37829` and `07ae15c`: full lint/types, **1,320 unit tests / 64 files**, **189 PostgreSQL integrations / 33 files**, both full browser layouts, nested cron audit/bundle, root advisory gate and actual installer/recovery. The latter builds the exact committed Dockerfile with all private operator probes. The final documentation head requires its own green checks before merge. |
+| Full deployment gate | **73 scripts/manifests passed**, including default-severity ShellCheck, Bash/MJS syntax and YAML parsing. `v060/ownership-deployment.log`. |
+| Affected source regressions | **3 Linux tests passed / 2 files**, including actual fixture cleanup/modes/sudo and deterministic GNU tar race behavior; focused ESLint passed. `v060/ownership-linux-units.log`, `ownership-focused-eslint.log`. |
+| Native/runtime proof | Both images: Node 22, package version **0.6.0**, UID 1001 and no global npm/npx. Backend: isolated CLI `deepmerge-ts` **8.0.2**, native Sharp WebP/SVG fonts and nonroot readability of real operator sources. Frontend: no backend database/mail/Redis/storage clients. `v060/final-native-images.json`. |
+| Corrected clean-stack recovery | Both layouts, strict internal TLS, least-privilege runtime role, **61 models**, private object HTTP 403/bytes, usable recovered ciphertext keys and membership/catalogue data, target-only schema residue removal, and actual BullMQ STARTTLS delivery before **and after** restore passed. `v060/runtime-only/acceptance.log`, `status`, `finished`. |
+| Root and independent dependency audits | Root: **0 critical / 0 high / 2 moderate**, tracked ExcelJS/UUID advisory. Independent cron lock: **zero findings** and credential-free bundle dry-run. These audits cover different lockfiles. |
+| Exact image vulnerability scans | Both final application images: **zero OS/library findings** at all severities with the frozen October 29 database. Complete unsuppressed reports: `image-security/inventory-060-backend-final/` and `inventory-060-frontend-final/`. Shared stack findings remain below. |
+
+Final local image IDs:
+
+- Backend runtime correction: `sha256:cf235b648d56faedfdaec6ba866364fd3c25334ea04b65cde3beb88a5fa372a7`.
+- Unchanged frontend: `sha256:2130446bab21b86cd1b16dbcd853adbb47393ab8b5510a2df7e5bdfb3d71996f`.
+- Actual deployed edge: `sha256:f5a8fdd2c2aeefcd1f2baa7d7a7a0add61422c50f47bd0e24e70412dd4606b08`.
+
+The user authorized publication through reviewed `dev` and then `main` PRs
+after their required checks pass. Publication is coordinated separately; this
+report does not claim a real-host deployment, provider validation or future
+CI results. The remaining external acceptance boundaries below still apply.
 
 ## Coverage and evidence
 
@@ -123,7 +193,7 @@ remain fatal. The final 0.6.0 full clean-stack drill remains pending below.
 | Integrations and jobs | Hashed API secrets, scoped API wrappers, signed outbound delivery, DNS pinning, webhook retry policy, SQL durable outbox, BullMQ queue definitions/worker/beat, scheduler registrations and production Compose worker health. Added real Redis worker integration: SQL outbox commits without sending, worker invokes a mocked transport and marks SENT, Redis holds only the outbox ID, repeated relay IDs deduplicate. A separate real worker/beat smoke delivered a synthetic email exactly once into local Mailpit and drained both processes through IPC. No external recipient was contacted. |
 | Deployment and operations | One-line `install.sh`, `local.sh`, production/local Compose, migrator/worker/beat, TLS/private data network, external proxy/storage overrides, CI, release scripts, backup/recovery configuration and environment preflight. Compared Events reference read-only: its legacy local Compose contains PostgreSQL only, while Inventory already contains requested PostgreSQL/Redis/Silo stack and private bucket initialization. Packaged split/single bootstrap, authenticated STARTTLS worker delivery, encrypted fresh-volume/key/private-object restore and target-only schema cleanup passed. Full VM/systemd/public-DNS provisioning and failed upgrade/rollback remain separate boundaries. |
 
-## Verification results
+## Historical 0.5.1 functional baseline
 
 Final acceptance ran source snapshots excluding credential files in
 `spaceworks-acceptance:20261029`: Ubuntu 24.04, Node 22.23.4, Playwright
@@ -136,7 +206,7 @@ with `npm ci`; the security override was then applied with a bounded install.
 All database URLs, Redis namespaces, object buckets and email recipients were
 explicit disposable fixtures. No ambient application configuration was loaded.
 
-| Gate | Exact result |
+| Baseline gate | Historical 0.5.1 result |
 | --- | --- |
 | Prisma validate and migrations | Passed; all six committed migrations applied to empty test databases. |
 | Full lint and root typecheck | Final `npm run lint` and `npm run typecheck` passed after all application and installer fixture changes. `final-security-lint.log`, `final-security-types.log`. |
@@ -253,13 +323,15 @@ was scanned unsuppressed: **zero critical, one high, two medium and one unknown*
 with no OS findings. These are the three unpatched go-jose/v3 advisories and
 the unmaintained OpenPGP advisory; the earlier fixable findings are absent.
 Inventory's actual Compose export is
-`sha256:3235b24a0efa5dccec40cc6a9ac6c612dcf924da7b875d70ed726fed47d0120b`;
+`sha256:f5a8fdd2c2aeefcd1f2baa7d7a7a0add61422c50f47bd0e24e70412dd4606b08`;
 its eight filesystem layers are identical to the reviewed reference above,
 while image configuration/Compose metadata differs. Its own unsuppressed scan
 also reports **zero critical, one high, two medium and one unknown**. Exact-ID
-scan evidence is `image-security/shared-caddy-inventory-final/`; filesystem
-equivalence is recorded in `inventory/edge-layer-equivalence.json`. The final
-Inventory installer and fresh-volume recovery passed with this actual edge.
+scan evidence and filesystem equivalence are recorded in
+`image-security/shared-caddy-inventory-060-final/`. Both the original and
+restored deployment's actual proxy image ID were checked. Final 0.6.0
+fresh-volume recovery passed with this actual edge; the older 0.5.1 variant
+`3235b24a…` remains historical evidence.
 The final shared assessment identifies the go-jose/v3 vulnerable
 symbols in the retained standard ACME-server module, with no such configured
 JWK ingress in the shipped reverse-proxy configurations. The older govulncheck
@@ -280,8 +352,9 @@ zero critical/high findings, but retains its medium/unknown inventory. Local,
 production and CI image references now pin
 those coordinated October 26 releases by verified multi-architecture manifest
 digest. Compatibility probes
-confirmed the mc/mcli aliases and curl are present. The updated stack has not
-yet passed this application's repeated recovery drill.
+confirmed the mc/mcli aliases and curl are present. The pinned October 26 stack
+passed both the 0.6.0 full native drill and the subsequent ownership-corrected
+fresh-volume encrypted recovery drill.
 
 ## Remaining limits and owner checks
 
