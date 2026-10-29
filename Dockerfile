@@ -29,7 +29,11 @@ CMD ["node", "scripts/prisma.mjs", "migrate", "deploy"]
 FROM node:22-alpine AS prisma-cli
 WORKDIR /opt/prisma-cli
 COPY --from=deps /app/node_modules/prisma/package.json /tmp/prisma-package.json
-RUN npm install --omit=dev --no-save --no-audit --no-fund \
+COPY package.json /tmp/application-package.json
+# Keep the isolated migration CLI's transitive security pins aligned with the app.
+# Copy only dependency overrides; application scripts/workspaces do not run here.
+RUN node -e 'const fs=require("node:fs"),p=require("/tmp/application-package.json");fs.writeFileSync("package.json",JSON.stringify({private:true,overrides:p.overrides||{}}))' \
+    && npm install --omit=dev --no-save --no-audit --no-fund \
       "prisma@$(node -p "require('/tmp/prisma-package.json').version")" \
     && npm cache clean --force
 
@@ -40,10 +44,12 @@ WORKDIR /opt/ops
 COPY --from=deps /app/node_modules/ioredis/package.json /tmp/ioredis-package.json
 COPY --from=deps /app/node_modules/@aws-sdk/client-s3/package.json /tmp/s3-package.json
 COPY --from=deps /app/node_modules/nodemailer/package.json /tmp/nodemailer-package.json
+COPY --from=deps /app/node_modules/bullmq/package.json /tmp/bullmq-package.json
 RUN npm install --omit=dev --no-save --no-audit --no-fund \
       "ioredis@$(node -p "require('/tmp/ioredis-package.json').version")" \
       "@aws-sdk/client-s3@$(node -p "require('/tmp/s3-package.json').version")" \
       "nodemailer@$(node -p "require('/tmp/nodemailer-package.json').version")" \
+      "bullmq@$(node -p "require('/tmp/bullmq-package.json').version")" \
     && npm cache clean --force
 
 # Stage 2: Rebuild the source code
@@ -122,6 +128,8 @@ COPY --from=frontend-builder --chown=nextjs:nodejs /app/frontend/.next/static ./
 COPY --from=frontend-builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
 COPY --chmod=755 scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN rm -f frontend/.env frontend/.env.local frontend/.env.production .env
+# Runtime roles execute Node directly; dependency installation stays in build stages.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
@@ -172,6 +180,8 @@ COPY --from=ops-modules /opt/ops/node_modules ./docker/vps/node_modules
 # from a developer checkout. Secrets belong only in the runtime environment.
 RUN rm -f .env .env.local .env.production .env.development
 
+# Migrations use the isolated Prisma CLI through Node, without a package manager.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 USER nextjs
 
 EXPOSE 3000

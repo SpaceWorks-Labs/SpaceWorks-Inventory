@@ -6,7 +6,7 @@ import { loanRef } from "@/lib/catalogue/references";
 import { nextSpaceSequence } from "@/lib/counters";
 import { DomainError } from "@/lib/domainError";
 import { emitEvent } from "@/lib/events/emit";
-import { releaseHolds, reserve } from "@/lib/inventory/availability";
+import { lockItems, releaseHolds, reserve } from "@/lib/inventory/availability";
 import { notifyUsers, staffIds } from "@/lib/notify";
 import { cancelOpenCharges, createLoanCharges } from "@/lib/payments/charges";
 import { checkBorrowingEligibility } from "../access";
@@ -64,6 +64,7 @@ export async function requestLoan(tx: Tx, input: { spaceId: string; borrowerId: 
  */
 export async function approveLoan(tx: Tx, input: { spaceId: string; loanId: string; quantities: Record<string, number> | null }, actor: Actor) {
   const loan = await lockLoan(tx, input.spaceId, input.loanId, "approve");
+  await lockItems(tx, loan.lines.map((line) => line.itemId));
   let total = 0;
   for (const line of loan.lines) {
     const quantity = input.quantities === null ? line.quantityRequested : input.quantities[line.id] ?? 0;
@@ -97,6 +98,7 @@ export async function rejectLoan(tx: Tx, input: { spaceId: string; loanId: strin
  */
 export async function cancelLoan(tx: Tx, input: { spaceId: string; loanId: string; reason: string | null; byBorrowerId?: string }, actor: Actor) {
   const loan = await lockLoan(tx, input.spaceId, input.loanId, "cancel", input.byBorrowerId);
+  await lockItems(tx, loan.lines.map((line) => line.itemId));
   for (const line of loan.lines) {
     await releaseHolds(tx, { spaceId: input.spaceId, itemId: line.itemId, owner: { loanLineId: line.id } }, actor, { refType: "Loan", refId: loan.id });
   }

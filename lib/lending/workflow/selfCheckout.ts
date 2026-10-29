@@ -7,13 +7,14 @@ import { nextSpaceSequence } from "@/lib/counters";
 import { DomainError } from "@/lib/domainError";
 import { emitEvent } from "@/lib/events/emit";
 import { recordEvidence, type EvidenceInput } from "@/lib/evidence";
-import { availableOf, lockLevels, takeAsset, takeFree } from "@/lib/inventory/availability";
+import { availableOf, lockItems, lockLevels, takeAsset, takeFree } from "@/lib/inventory/availability";
 import { notifyUsers, staffIds } from "@/lib/notify";
 import { assertIssueAllowed, createLoanCharges, payLaterForLoan } from "@/lib/payments/charges";
 import { checkBorrowingEligibility } from "../access";
 import { addDays, loanDaysFor } from "../policy";
 import { loanUrl, type Actor } from "./common";
 import { resolveScans } from "./scans";
+import { lockBorrowingAllowance } from "./allowance";
 
 /**
  * A member checks items out themselves by scanning their labels (one unit
@@ -22,6 +23,7 @@ import { resolveScans } from "./scans";
  * standing. Fees must be zero or pay-later must be allowed.
  */
 export async function selfCheckout(tx: Tx, input: { spaceId: string; borrowerId: string; scannedCodes: string[]; quantities?: Record<string, number>; evidence: EvidenceInput }, actor: Actor) {
+  await lockBorrowingAllowance(tx, input.spaceId, input.borrowerId);
   const space = await tx.space.findUniqueOrThrow({ where: { id: input.spaceId } });
   if (!space.lendingEnabled || !space.selfCheckoutEnabled) throw new DomainError("Self-checkout is switched off in this space.", "forbidden");
   const scans = await resolveScans(tx, input.spaceId, input.scannedCodes);
@@ -42,6 +44,7 @@ export async function selfCheckout(tx: Tx, input: { spaceId: string; borrowerId:
     data: { spaceId: input.spaceId, number: await nextSpaceSequence(tx, input.spaceId, "loan"), borrowerId: input.borrowerId, selfCheckout: true, status: "APPROVED", approvedAt: now, dueAt: addDays(now, loanDaysFor(space, items)) },
   });
   const ref = { refType: "Loan", refId: loan.id };
+  await lockItems(tx, itemIds);
   for (const item of items) {
     if (item.tracking === "SERIALIZED") {
       for (const asset of assets.filter((a) => a.itemId === item.id)) {

@@ -11,6 +11,7 @@ SWI_PROJECT_NAME="swi-smoke-$(date +%s)"
 export SWI_CONFIG_DIR SWI_PROJECT_NAME
 cleanup() {
   status=$?
+  docker rm -f "$SWI_PROJECT_NAME-mailpit" >/dev/null 2>&1 || true
   if [[ $status != 0 && -f "$SWI_CONFIG_DIR/compose.env" ]]; then
     # Only this disposable deployment; never dump interpolated configuration.
     as_root sh scripts/vps-compose.sh ps || true
@@ -33,7 +34,7 @@ docker build --target frontend --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,en
 # Exercise the exact configuration writer the confirmed installer runs.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" swi-backend:smoke \
   node docker/vps/setup.mjs api.space.example.test owner@example.test smoke space.example.test split
-export EMAIL_FROM='Space Works Inventory <noreply@example.test>' SMTP_HOST=smtp.example.test SMTP_PORT=587 SMTP_SECURE=false SMTP_USER=smoke SMTP_PASSWORD=disposable-ci-smtp
+export EMAIL_FROM='Space Works Inventory <noreply@example.test>' SMTP_HOST=mailpit SMTP_PORT=1025 SMTP_SECURE=false SMTP_USER=smoke SMTP_PASSWORD=disposable-ci-smtp
 # Credentials travel in environment, never arguments.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" \
   -e EMAIL_FROM -e SMTP_HOST -e SMTP_PORT -e SMTP_SECURE -e SMTP_USER -e SMTP_PASSWORD \
@@ -41,6 +42,7 @@ docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" \
 printf "SWI_CADDY_TLS='internal'\n" | as_root tee -a "$SWI_CONFIG_DIR/compose.env" >/dev/null
 as_root mkdir -m 755 "$SWI_CONFIG_DIR/status"
 as_root sh scripts/vps-compose.sh config --quiet
+as_root sh scripts/vps-compose.sh build proxy
 as_root sh scripts/vps-compose.sh up -d --wait --wait-timeout 300
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/check.mjs
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smoke.mjs
@@ -49,7 +51,17 @@ as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smok
 as_root bash -c '. scripts/vps-lib.sh
 conf_set "$1/compose.env" SWI_LAYOUT single
 conf_set "$1/compose.env" SWI_CADDYFILE Caddyfile
+conf_set "$1/compose.env" PUBLIC_HOST "$(conf_get "$1/compose.env" SITE_HOST)"
 conf_set "$1/app.env" DEPLOYMENT_MODE ""' _ "$SWI_CONFIG_DIR"
+# The single hostname must be the same origin that auth and generated links use.
+# shellcheck disable=SC2016 # expanded by the inner shell
+as_root bash -c '. scripts/vps-lib.sh
+origin="https://$(conf_get "$1/compose.env" PUBLIC_HOST)"
+[[ "$(conf_get "$1/compose.env" PUBLIC_ORIGIN)" = "$origin" ]]
+[[ "$(conf_get "$1/app.env" AUTH_URL)" = "$origin" ]]
+[[ "$(conf_get "$1/app.env" NEXT_PUBLIC_BASE_URL)" = "$origin" ]]' _ "$SWI_CONFIG_DIR"
 as_root sh scripts/vps-compose.sh up -d --wait --wait-timeout 300 --remove-orphans
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smoke.mjs
 printf 'Two-image installer smoke passed in split and single layouts.\n'
+as_root bash scripts/test-vps-jobs.sh
+as_root bash scripts/test-vps-recovery.sh

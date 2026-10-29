@@ -1,5 +1,3 @@
-import { readdir, rm } from "node:fs/promises";
-import path from "node:path";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
@@ -12,6 +10,7 @@ import { memberLoans } from "@/lib/desk/loansMember";
 import { loanQueue } from "@/lib/desk/loansQueue";
 import { approveStep, cancelStep, issueStep, rejectStep, renewStep, requestStep, returnStep, selfCheckoutStep, selfReturnStep, type StepContext } from "@/lib/desk/loanSteps";
 import { cleanup, seedSpace, uniqueSuffix } from "../helpers/fixtures";
+import { cleanupStoredObjects, storedObjectKeys } from "../helpers/storedObjects";
 
 const suffixA = uniqueSuffix();
 const suffixB = uniqueSuffix();
@@ -25,7 +24,7 @@ beforeAll(async () => {
   png = await sharp({ create: { width: 16, height: 16, channels: 3, background: { r: 0, g: 110, b: 99 } } }).png().toBuffer();
 });
 afterAll(async () => {
-  for (const space of [a.space, b.space]) await rm(path.resolve(process.cwd(), ".data/storage/spaces", space.id), { recursive: true, force: true });
+  for (const space of [a.space, b.space]) await cleanupStoredObjects(space.id);
   await cleanup([a.space.slug], a.domain);
   await cleanup([b.space.slug], b.domain);
 });
@@ -34,11 +33,7 @@ const photo = () => new File([new Uint8Array(png)], "evidence.png", { type: "ima
 const ctxOf = (space: { id: string; timezone: string }, userId: string): StepContext => ({ spaceId: space.id, userId, timeZone: space.timezone });
 const deskA = () => ctxOf(a.space, a.staff.id);
 const memberA = () => ctxOf(a.space, a.member.id);
-const storedPhotos = async (spaceId: string) => {
-  const dir = path.resolve(process.cwd(), ".data/storage/spaces", spaceId, "evidence");
-  // Deleting a photo leaves its (empty) folder behind, so count the files themselves.
-  return (await readdir(dir, { recursive: true }).catch(() => [] as string[])).filter((name) => name.endsWith(".webp")).length;
-};
+const storedPhotos = async (spaceId: string) => (await storedObjectKeys(spaceId, "evidence")).length;
 
 async function lendable(space: { id: string }, shelf: { id: string }, name: string, quantity: number, extra: Record<string, unknown> = {}) {
   const item = await prisma.$transaction((tx) => createItem(tx, space.id, { name, lendable: true, ...extra }, { userId: null }));

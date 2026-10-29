@@ -1,10 +1,11 @@
 {
   "name": "spaceworks-inventory",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "prisma generate && next dev",
+    "dev:stack": "node --env-file-if-exists=.env scripts/check-local-services.mjs && prisma generate && npm run build:jobs && node --env-file-if-exists=.env scripts/dev-stack.mjs",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
@@ -69,7 +70,7 @@
     "lucide-react": "1.49.0",
     "next": "^16.3.5",
     "next-auth": "^5.0.0-beta.32",
-    "nodemailer": "10.0.10",
+    "nodemailer": "10.3.1",
     "otpauth": "^9.5.1",
     "pdf-lib": "1.17.1",
     "qrcode": "^1.5.4",
@@ -95,6 +96,9 @@
     "typescript": "^5",
     "vitest": "^4.1.12",
     "yaml": "^2.8.1"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2"
   },
   "allowScripts": {
     "@prisma/client@6.19.3": true,

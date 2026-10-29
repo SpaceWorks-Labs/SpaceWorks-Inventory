@@ -72,7 +72,7 @@ services:
   # Bundled Silo object storage (profile silo); external S3 skips both services.
   storage:
     profiles: [silo]
-    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/silo:RELEASE.2026-10-26T00-00-00Z@sha256:7bb2aff6b89efe1cb1303c10fc21d579447434ed06649ac9ec05a5e2dbf30ad7
     restart: unless-stopped
     env_file: ${SWI_CONFIG_DIR}/storage.env
     command: ["server", "/data", "--certs-dir", "/server-tls", "--console-address", ":9001"]
@@ -90,7 +90,7 @@ services:
 
   storage-init:
     profiles: [silo]
-    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/silo:RELEASE.2026-10-26T00-00-00Z@sha256:7bb2aff6b89efe1cb1303c10fc21d579447434ed06649ac9ec05a5e2dbf30ad7
     restart: "no"
     env_file: ${SWI_CONFIG_DIR}/storage-init.env
     entrypoint: ["/bin/sh", "/bootstrap/init-storage.sh"]
@@ -154,7 +154,9 @@ services:
   # Caddy HTTPS edge (profile caddy); an existing reverse proxy replaces it.
   proxy:
     profiles: [caddy]
-    image: caddy:2-alpine
+    image: spaceworks-caddy:2.11.7-security-20261029
+    build:
+      context: ./docker/caddy
     restart: unless-stopped
     environment:
       PUBLIC_HOST: ${PUBLIC_HOST}

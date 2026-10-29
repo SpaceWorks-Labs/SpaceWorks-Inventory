@@ -1,5 +1,3 @@
-import { existsSync, rmSync } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
@@ -10,13 +8,14 @@ import { evidencePhotoForViewer } from "@/lib/desk/evidence";
 import { readHandoverForm, withEvidencePhotos } from "@/lib/desk/photos";
 import { scanTarget } from "@/lib/desk/scan";
 import { addMember, cleanup, createSpace, createUser, seedSpace, uniqueSuffix } from "../helpers/fixtures";
+import { cleanupStoredObjects } from "../helpers/storedObjects";
+import { getObject } from "@/lib/storage";
 
 const suffix = uniqueSuffix();
 let a: Awaited<ReturnType<typeof seedSpace>>;
 let b: { id: string; slug: string };
 let otherMember: { id: string };
 let bStaff: { id: string };
-const storageRoot = path.resolve(process.cwd(), ".data/storage");
 const fakePhoto = (spaceId: string) => ({ storageKey: `spaces/${spaceId}/evidence/${crypto.randomUUID()}/p.webp`, contentType: "image/webp", sizeBytes: 10, sha256: "0".repeat(64) });
 
 beforeAll(async () => {
@@ -29,7 +28,7 @@ beforeAll(async () => {
   await addMember(b.id, a.member.id, "MEMBER");
 });
 afterAll(async () => {
-  for (const id of [a?.space.id, b?.id]) if (id) rmSync(path.join(storageRoot, "spaces", id), { recursive: true, force: true });
+  for (const id of [a?.space.id, b?.id]) if (id) await cleanupStoredObjects(id);
   await cleanup([a.space.slug, b.slug], a.domain);
 });
 
@@ -84,11 +83,12 @@ describe("handover photo storage", () => {
     let keys: string[] = [];
     await expect(withEvidencePhotos(a.space.id, [file(), file()], async (photos) => {
       keys = photos.map((photo) => photo.storageKey);
-      expect(keys.every((key) => key.startsWith(`spaces/${a.space.id}/evidence/`) && existsSync(path.join(storageRoot, key)))).toBe(true);
+      expect(keys.every((key) => key.startsWith(`spaces/${a.space.id}/evidence/`))).toBe(true);
+      expect((await Promise.all(keys.map(getObject))).every(Boolean)).toBe(true);
       throw new DomainError("Refused.");
     })).rejects.toThrow("Refused.");
     expect(keys).toHaveLength(2);
-    expect(keys.some((key) => existsSync(path.join(storageRoot, key)))).toBe(false);
+    expect(await Promise.all(keys.map(getObject))).toEqual([null, null]);
     await expect(withEvidencePhotos(a.space.id, [new File([new Uint8Array([1, 2, 3])], "x.png", { type: "image/png" })], async () => "never")).rejects.toThrow(/couldn't be read/);
     await expect(withEvidencePhotos(a.space.id, Array.from({ length: 7 }, file), async () => "never")).rejects.toThrow(/at most 6/);
     expect(await withEvidencePhotos(a.space.id, [file()], async (photos) => photos.length)).toBe(1);

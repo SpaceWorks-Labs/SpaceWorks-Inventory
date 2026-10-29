@@ -79,7 +79,6 @@ if (process.argv[2] === "serve-frontend") {
       if (!ready) throw new Error("Disposable PostgreSQL did not become ready.");
     }
     await run(process.execPath, ["scripts/prisma.mjs", "migrate", "deploy"], env);
-    if (demo) await run(process.execPath, ["scripts/seed-demo.mjs"], { ...env, NODE_ENV: "test" });
     await run("npm", ["run", "build"], env);
     await run(process.execPath, ["scripts/prepare-standalone.mjs"], env);
     for (const name of [".env", ".env.local", ".env.production", ".env.production.local", ".env.development"]) await rm(`.next/standalone/${name}`, { force: true });
@@ -94,7 +93,14 @@ if (process.argv[2] === "serve-frontend") {
       }
       if (!ready) throw new Error("Disposable backend did not become ready.");
     }
-    await run("npx", ["playwright", "test", "--workers=1"], { ...env, ...(process.env.PLAYWRIGHT_BROWSERS_PATH ? { PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH } : {}) });
+    const browserEnv = { ...env, ...(process.env.PLAYWRIGHT_BROWSERS_PATH ? { PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH } : {}) };
+    if (demo) {
+      // Exercise empty-install onboarding before the demo seed makes setup unavailable.
+      await run("npx", ["playwright", "test", "tests/e2e/00-setup.spec.ts", "--workers=1"], { ...browserEnv, DEMO_PASSWORD: "" });
+      await rm(".data/e2e-auth", { recursive: true, force: true });
+      await run(process.execPath, ["scripts/seed-demo.mjs"], { ...env, NODE_ENV: "test" });
+    }
+    await run("npx", ["playwright", "test", "--workers=1"], browserEnv);
     if (monolith) console.log("Whole-VPS production browser suite passed against disposable dependencies.");
     else console.log("Split hosting passed with separate action keys and no database/auth/mail/storage credentials on the frontend.");
   } finally { cleanup(); }

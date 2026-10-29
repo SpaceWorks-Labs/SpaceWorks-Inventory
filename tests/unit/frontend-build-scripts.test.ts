@@ -16,7 +16,7 @@ function fixture(files: Record<string, string>) {
     writeFileSync(path.join(directory, file), source);
   }
   mkdirSync(path.join(directory, "scripts"), { recursive: true });
-  for (const name of ["prepare-frontend.mjs", "check-frontend-boundary.mjs", "frontend-render-declarations.mjs"]) {
+  for (const name of ["prepare-frontend.mjs", "check-frontend-boundary.mjs", "frontend-render-declarations.mjs", "frontend-source-hash.mjs"]) {
     cpSync(path.join(root, "scripts", name), path.join(directory, "scripts", name));
   }
   return directory;
@@ -30,6 +30,24 @@ afterEach(() => {
 });
 
 describe("split frontend scripts", () => {
+  it("hashes LF and CRLF source identically but detects actual content changes", () => {
+    const files = {
+      "app/page.tsx": "export default function Page() { return null; }\n",
+      "components/label.ts": 'export const label = "Label";\n',
+      "lib/example.ts": 'export const example = "Example";\n',
+      "prisma/schema.prisma": 'generator client {\n  provider = "prisma-client-js"\n}\n',
+    };
+    const directory = fixture(files);
+    const hash = () => execFileSync(process.execPath, ["--input-type=module", "-e",
+      'import { frontendSourceHash } from "./scripts/frontend-source-hash.mjs"; process.stdout.write(frontendSourceHash());',
+    ], { cwd: directory, encoding: "utf8" });
+    const lf = hash();
+    for (const [file, source] of Object.entries(files)) writeFileSync(path.join(directory, file), source.replace(/\n/g, "\r\n"));
+    expect(hash()).toBe(lf);
+    writeFileSync(path.join(directory, "lib/example.ts"), 'export const example = "Changed";\r\n');
+    expect(hash()).not.toBe(lf);
+  });
+
   it("prepares an empty facade directory without skipping any source walks", () => {
     const directory = fixture({
       "app/globals.css": '@import "tailwindcss";',
