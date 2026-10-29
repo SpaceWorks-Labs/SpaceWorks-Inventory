@@ -6,7 +6,7 @@ import { loanRef } from "@/lib/catalogue/references";
 import { DomainError } from "@/lib/domainError";
 import { emitEvent } from "@/lib/events/emit";
 import { recordEvidence, type EvidenceInput } from "@/lib/evidence";
-import { releaseHolds, takeAsset, takeFromHolds } from "@/lib/inventory/availability";
+import { lockItems, releaseHolds, takeAsset, takeFromHolds } from "@/lib/inventory/availability";
 import { notifyUsers } from "@/lib/notify";
 import { assertIssueAllowed } from "@/lib/payments/charges";
 import { formatDayLong } from "@/lib/format/datetime";
@@ -14,6 +14,7 @@ import { checkBorrowingEligibility } from "../access";
 import { addDays } from "../policy";
 import { lockLoan, loanUrl, type Actor, type LockedLoan } from "./common";
 import { resolveScans, type ScanSet } from "./scans";
+import { lockBorrowingAllowance } from "./allowance";
 
 /** Check the container scan: required by policy, free (not on another active loan) and active. */
 async function containerFor(tx: Tx, loan: LockedLoan, scans: ScanSet) {
@@ -22,6 +23,8 @@ async function containerFor(tx: Tx, loan: LockedLoan, scans: ScanSet) {
     if (loan.space.requireContainer) throw new DomainError("Pack the items in a container and scan its label.", "invalid");
     return null;
   }
+  // Two handovers of different loans must not claim the same container.
+  await tx.$queryRaw`SELECT "id" FROM "Container" WHERE "id" = ${container.id} AND "spaceId" = ${loan.spaceId} FOR UPDATE`;
   const busy = await tx.loan.findFirst({ where: { containerId: container.id, status: { in: ["ISSUED", "PARTIALLY_RETURNED"] } }, select: { number: true } });
   if (busy) throw new DomainError(`${container.label} is already out on ${loanRef(busy.number)}.`, "conflict");
   const row = await tx.container.findUniqueOrThrow({ where: { id: container.id }, select: { archivedAt: true } });
@@ -52,12 +55,14 @@ async function issueSerializedLine(tx: Tx, loan: LockedLoan, line: LockedLoan["l
  */
 export async function issueLoan(tx: Tx, input: { spaceId: string; loanId: string; scannedCodes: string[]; evidence: EvidenceInput }, actor: Actor) {
   const loan = await lockLoan(tx, input.spaceId, input.loanId, "issue");
+  await lockBorrowingAllowance(tx, input.spaceId, loan.borrowerId);
   const units = loan.lines.reduce((sum, line) => sum + line.quantityApproved, 0);
   const eligible = await checkBorrowingEligibility(tx, { spaceId: input.spaceId, userId: loan.borrowerId, incomingUnits: units });
   if (!eligible.ok) throw new DomainError(eligible.error, "forbidden");
   await assertIssueAllowed(tx, { loanId: loan.id });
   const scans = await resolveScans(tx, input.spaceId, input.scannedCodes);
   const container = await containerFor(tx, loan, scans);
+  await lockItems(tx, loan.lines.map((line) => line.itemId));
   let allConsumed = true;
   for (const line of loan.lines) {
     if (line.quantityApproved === 0) continue;

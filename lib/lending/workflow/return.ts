@@ -6,7 +6,7 @@ import { loanRef } from "@/lib/catalogue/references";
 import { DomainError } from "@/lib/domainError";
 import { emitEvent } from "@/lib/events/emit";
 import { recordEvidence, type EvidenceInput } from "@/lib/evidence";
-import { bringBackAsset, putBack, recordLossWhileOut } from "@/lib/inventory/availability";
+import { bringBackAsset, lockItems, putBack, recordLossWhileOut } from "@/lib/inventory/availability";
 import { notifyUsers, staffIds } from "@/lib/notify";
 import { addIncidentCharge, addLateFee } from "@/lib/payments/charges";
 import { syncAutomaticRestriction } from "../access";
@@ -35,6 +35,7 @@ async function openIncident(tx: Tx, loan: LockedLoan, line: LockedLoan["lines"][
 export async function returnLoan(tx: Tx, input: { spaceId: string; loanId: string; scannedCodes: string[]; lines: ReturnLine[]; evidence: EvidenceInput; byBorrowerId?: string }, actor: Actor) {
   const loan = await lockLoan(tx, input.spaceId, input.loanId, "return", input.byBorrowerId);
   if (input.byBorrowerId && !loan.selfCheckout) throw new DomainError("Return this loan at the desk.", "forbidden");
+  await lockItems(tx, loan.lines.map((line) => line.itemId));
   const scans = await resolveScans(tx, input.spaceId, input.scannedCodes);
   const byId = new Map(loan.lines.map((line) => [line.id, line]));
   if (new Set(input.lines.map((l) => l.lineId)).size !== input.lines.length) throw new DomainError("List each line once.", "invalid");

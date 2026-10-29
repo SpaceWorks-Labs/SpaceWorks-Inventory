@@ -7,8 +7,9 @@ Compose. The stack uses two images of its own: the **backend** (the web
 application and API, the one-shot migrations, the background worker and beat,
 and the operator tools) and the **frontend** (the website alone, used only by
 the two-hostname layout). PostgreSQL 16, Redis 7, private Silo S3-compatible
-storage and Caddy HTTPS run from their standard images in the same Compose
-file. Node.js, PostgreSQL and Redis do not need to be installed on the host.
+storage run from their standard images. The bundled Caddy HTTPS edge is built
+locally from pinned sources and security updates in the same Compose file.
+Node.js, Go, PostgreSQL and Redis do not need to be installed on the host.
 
 Production uses `compose.production.yml` through `scripts/vps-compose.sh`.
 `docker-compose.yml` starts local development services only; never use it on a
@@ -18,12 +19,18 @@ server.
 
 - A 64-bit (x86_64 or arm64) Linux VPS: Ubuntu/Debian, Fedora/RHEL/Alma/Rocky,
   Arch or openSUSE. The installer installs Docker Engine + Compose when missing.
-  Start with **2 vCPU, 2 GB RAM and 30 GB SSD** for a small installation, with
+  Start with **2 vCPU, 4 GB RAM with swap available and 30 GB SSD** for the bundled
+  edge and a small installation, with
   extra space for photos and backups (setup refuses less than 10 GB free).
   These are starting estimates, not load-tested capacity limits. Releases run
-  published images; only a source build (`--ref`) compiles on the server, which
-  needs about 4 GB of memory. The installer offers a swap file when memory is
-  short.
+  published application images and build the bundled patched Caddy edge locally.
+  A source build (`--ref`) also compiles the applications and needs build
+  headroom. The installer offers a 4 GB swap file when combined memory and swap
+  are short. Leave build reserve during updates while the previous services
+  still run. The measured edge build cgroup peak was 2.21 GiB at two CPUs,
+  including reclaimable module/file cache; this is evidence rather than a
+  minimum isolated compiler RSS. An external reverse proxy skips the bundled
+  edge build.
 - A domain, such as `inventory.example.org`, whose DNS A record points to the
   VPS. Add an AAAA record only if IPv6 reaches this host too. Start with
   DNS-only records; the supplied proxy assumes clients connect directly to
@@ -208,6 +215,17 @@ use Caddy's own certificate rather than plain HTTP. `compose.env` records the
 choice (`SWI_CADDY_TLS`: `internal`, `proxy`, or unset for automatic).
 
 ### File storage
+
+The bundled server and its CI client use the coordinated October 26, 2026
+Silo release. Images retain readable release tags and immutable multi-architecture
+manifest digests (amd64 and arm64):
+
+- `pgsty/silo:RELEASE.2026-10-26T00-00-00Z@sha256:7bb2aff6b89efe1cb1303c10fc21d579447434ed06649ac9ec05a5e2dbf30ad7`
+- `pgsty/mc:RELEASE.2026-10-26T00-00-00Z@sha256:ce62c9053c69ce12a527a322345b5ad9f44b5f8a7b8189f82e516f2e3f30f1d8`
+
+Upgrade the storage server and client together, retain encryption keys and
+independent backups, then verify private-object access and a restore before
+accepting traffic.
 
 Setup also asks where uploads (item photos and handover evidence photos) live:
 bundled **Silo** on this server (default) or an **external S3-compatible bucket**

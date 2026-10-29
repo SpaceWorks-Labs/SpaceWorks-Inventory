@@ -8,6 +8,27 @@ build is tagged `v<version>-main.<run>.<commit>`; see
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-29
+
+### Fixed
+
+- Preserve public asset access for the nonroot backend when installation files use private directory and file modes.
+- Preserve nonroot access to directly copied operator scripts and verify private script/directory modes in the image fixture.
+- Pass explicit nonsecret installer fixture coordinates through environment-clearing sudo implementations.
+- Update the independent Cloudflare cron tooling lockfile and audit its dependencies and credential-free bundle separately in CI.
+- Stage private PostgreSQL bootstrap inputs for its service user and prevent an encrypted-backup output creation race.
+
+- Serialize borrower allowance and shared-container lending decisions and reject ineligible borrowers.
+- Block mapped IPv6 webhook targets and update Nodemailer for security fixes.
+- Supervise the complete local stack with private storage, captured email, durable Redis and local service guards.
+- Restore the complete application schema atomically, remove newer-release table residue, keep failed post-commit recoveries offline and tear down inactive layout services.
+- Preserve dropdown labels and verify full Linux browser, private-storage and encrypted recovery journeys with real queued SMTP before and after restore.
+- Pin the migration CLI security override and bound production image build concurrency.
+- Keep mobile transfer references on one line so they do not overlap direction captions.
+- Remove the unused global npm package manager from published runtime images while retaining Node and the isolated migration CLI.
+- Pin the coordinated October 26 Silo server and client release by immutable multi-architecture digest across local, production and CI storage.
+- Build the bundled Caddy edge with a patched Go toolchain, locked dependencies and Alpine security updates, and propagate installer build failures.
+
 ## [0.5.0] - Unreleased
 
 The first public release: everything since the split from SpaceWorks

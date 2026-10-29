@@ -5,6 +5,7 @@ import type { DbClient } from "@/lib/db";
 import { recordAuditEvent } from "@/lib/audit";
 import { emitEvent } from "@/lib/events/emit";
 import { createNotifications } from "@/lib/notifications";
+import { hasRoleAtLeast } from "@/lib/roles";
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -77,12 +78,12 @@ export async function checkBorrowingEligibility(client: DbClient, input: { space
   const membership = await client.membership.findUnique({
     where: { userId_spaceId: { userId: input.userId, spaceId: input.spaceId } },
     select: {
-      status: true, borrowingStatus: true, borrowingNote: true, memberNumber: true,
-      user: { select: { emailVerified: true } },
+      status: true, role: true, borrowingStatus: true, borrowingNote: true, memberNumber: true,
+      user: { select: { emailVerified: true, disabledAt: true } },
       space: { select: { lendingEnabled: true, requireVerifiedEmail: true, requireMemberNumber: true, maxActiveLoans: true, maxItemsOnLoan: true } },
     },
   });
-  if (!membership || membership.status !== "ACTIVE") return { ok: false, code: "standing", error: "This person isn't an active member of the space." };
+  if (!membership || membership.status !== "ACTIVE" || membership.user.disabledAt || !hasRoleAtLeast(membership.role, "MEMBER")) return { ok: false, code: "standing", error: "This person isn't an active member of the space." };
   const { space } = membership;
   if (!space.lendingEnabled) return { ok: false, code: "lending_off", error: "Lending is switched off in this space." };
   if (membership.borrowingStatus !== "GOOD") {

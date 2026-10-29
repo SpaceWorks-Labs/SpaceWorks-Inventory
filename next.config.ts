@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   allowedDevOrigins,
   experimental: {
+    // Bound page-generation workers on shared hosts; CPU quotas do not change os.cpus().
+    cpus: 2,
     proxyClientMaxBodySize: "40mb",
     serverActions: {
       // Same-origin by default. Configure explicitly when a trusted proxy

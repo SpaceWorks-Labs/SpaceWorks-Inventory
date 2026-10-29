@@ -30,7 +30,7 @@ the newest image) rather than patching an older version.
 
 | Version | Supported |
 | --- | --- |
-| 0.1.x (latest release) | Yes |
+| 0.6.x (latest release) | Yes |
 | Earlier builds, pre-releases and `dev` | No |
 
 ## Security model in brief
@@ -44,7 +44,7 @@ permissions). In short:
   archived and foreign spaces, records and QR codes all answer the same
   not-found. A transfer between spaces checks each side against its own
   membership.
-- **Roles.** Owner, admin, inventory manager, staff and member, checked on the
+- **Roles.** Inventory manager, staff, member and repair-only technician, checked on the
   server for every request (`lib/roles.ts`); hiding a button is never the only
   check. The instance admin area (`/admin`) needs a fresh authenticator code.
 - **Sign-in.** Email and password, emailed single-use sign-in links and TOTP
