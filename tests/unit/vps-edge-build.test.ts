@@ -23,7 +23,7 @@ compose() {
   if [[ "$1" = "${failure}" ]]; then return 23; fi
   if [[ "$*" = 'build proxy' ]]; then return ${failure === "edge" ? 23 : 0}; fi
 }
-if fetch_images 0.5.1 split; then printf 'ready\\n'; else exit $?; fi
+if fetch_images 0.6.0 split; then printf 'ready\\n'; else exit $?; fi
 `,
     });
   } finally { rmSync(root, { recursive: true, force: true }); }

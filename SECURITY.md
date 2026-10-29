@@ -30,7 +30,7 @@ the newest image) rather than patching an older version.
 
 | Version | Supported |
 | --- | --- |
-| 0.5.x (latest release) | Yes |
+| 0.6.x (latest release) | Yes |
 | Earlier builds, pre-releases and `dev` | No |
 
 ## Security model in brief

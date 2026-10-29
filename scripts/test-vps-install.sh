@@ -18,16 +18,43 @@ cleanup() {
     as_root sh scripts/vps-compose.sh logs --tail 40 app frontend worker beat || true
   fi
   [[ ! -f "$SWI_CONFIG_DIR/compose.env" ]] || as_root sh scripts/vps-compose.sh down --volumes --remove-orphans >/dev/null 2>&1 || true
+  [[ -z ${public_probe:-} ]] || rm -rf -- "$public_probe"
   as_root rm -rf -- "$work"
 }
 trap cleanup EXIT
 # The real installer runs as root; config files are root-owned with mode 600.
-as_root() { if [[ $(id -u) = 0 ]]; then "$@"; else sudo -E "$@"; fi; }
+as_root() {
+  if [[ $(id -u) = 0 ]]; then
+    "$@"
+  else
+    # sudo-rs may ignore -E; only these nonsecret fixture coordinates are needed.
+    sudo env CI=true "SWI_CONFIG_DIR=$SWI_CONFIG_DIR" "SWI_PROJECT_NAME=$SWI_PROJECT_NAME" "$@"
+  fi
+}
 mkdir -m 700 "$SWI_CONFIG_DIR"
+# Only this new owned fixture is restrictive; existing checkout permissions stay intact.
+public_probe=$(mktemp -d "$root/public/audit-permissions.XXXXXX")
+mkdir -m 700 "$public_probe/nested"
+(umask 077; printf 'inventory-public-permission-fixture\n' > "$public_probe/nested/readable.txt")
 export SWI_BUILD_KEY
 SWI_BUILD_KEY=$(openssl rand -base64 32)
 docker build --target runner --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid -t swi-backend:smoke .
+# The default serving user must retain access without relaxing the private modes.
+docker run --rm --network none --entrypoint node -e SWI_PUBLIC_PERMISSION_PROBE="${public_probe#"$root/"}" swi-backend:smoke -e '
+const assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path");
+const probe = path.join("/app", process.env.SWI_PUBLIC_PERMISSION_PROBE);
+assert.equal(process.getuid(), 1001);
+for (const directory of [probe, path.join(probe, "nested")]) {
+  assert.equal(fs.statSync(directory).mode & 0o777, 0o700);
+  assert.equal(fs.statSync(directory).uid, 1001);
+  fs.readdirSync(directory);
+}
+const asset = path.join(probe, "nested/readable.txt");
+assert.equal(fs.statSync(asset).mode & 0o777, 0o600);
+assert.equal(fs.readFileSync(asset, "utf8"), "inventory-public-permission-fixture\n");
+console.log("Nonroot backend read private-mode public directories and asset.");
+'
 docker build --target frontend --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid \
   --build-arg NEXT_PUBLIC_BACKEND_ORIGIN=https://spaceworks-inventory-backend.invalid -t swi-frontend:smoke .

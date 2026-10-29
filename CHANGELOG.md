@@ -8,9 +8,12 @@ build is tagged `v<version>-main.<run>.<commit>`; see
 
 ## [Unreleased]
 
-## [0.5.1] - 2026-10-29
+## [0.6.0] - 2026-10-29
 
 ### Fixed
+
+- Preserve public asset access for the nonroot backend when installation files use private directory and file modes.
+- Pass explicit nonsecret installer fixture coordinates through environment-clearing sudo implementations.
 
 - Serialize borrower allowance and shared-container lending decisions and reject ineligible borrowers.
 - Block mapped IPv6 webhook targets and update Nodemailer for security fixes.

@@ -5,13 +5,15 @@
 This is a bounded source, integration, browser and deployment review of the
 standalone Space Works Inventory repository, with the other products audited
 separately. Verified security, lending and accessibility defects were fixed.
-The complete available Linux application suites and packaged local clean-stack
-installation/recovery acceptance pass. Both deployment layouts, real queued
-STARTTLS email before and after recovery, empty-volume encrypted recovery,
-private objects, usable restored keys and complete schema replacement were
-verified. Version 0.5.1 is prepared on `dev`; publication remains a coordinator
-step. The final npm-free image, patched edge and pinned storage refresh passed
-the complete packaged acceptance again. No push or deployment was performed.
+Version **0.6.0** is prepared at the user's direction on the audit feature
+branch. The complete Linux application suites and packaged clean-stack results
+below describe the preceding **0.5.1 functional baseline**. Both layouts, real
+queued STARTTLS email before/after recovery, empty-volume encrypted recovery,
+private objects, usable restored keys and complete schema replacement passed.
+The subsequent 0.6.0 update fixes public-asset ownership in the nonroot backend
+and adds an actual private-mode asset image assertion. Final 0.6.0 native image,
+installer/recovery, image scans and new-head CI are pending; the older image IDs
+and scan evidence are retained as historical proof. No deployment was performed.
 This report does not certify the absence of other defects or replace validation
 of a real host, public DNS, external providers, load and operational ownership.
 
@@ -43,6 +45,37 @@ Playwright guides were consulted before framework-related verification.
 | Low; lifecycle correctness | Switching from split to single left the inactive profiled frontend container behind, so ordinary teardown did not fully remove the prior layout. | `vps-compose.sh down` selects all profiles. An actual shell-selection regression and final clean-stack teardown passed; no final split frontend or deployment service remains. |
 | Low | `SECURITY.md` documented an unreleased 0.1 release line and obsolete owner/admin tenant roles. | Align security policy with 0.5 and the authoritative manager/staff/member/technician model. |
 | Medium | Local quickstart configured Redis but started only the Next.js process, leaving the BullMQ outbox and schedules unprocessed. Mailpit existed in Compose but SMTP defaults were blank; local Redis had no durable job volume. | Add a cross-platform `dev:stack` supervisor, wire `local.sh` to web/worker/beat, use separate loopback worker health ports, drain workers with IPC/signals before stopping Docker, and stop siblings when a child fails. Add loopback-only PostgreSQL/direct/Redis/S3/SMTP checks before local migrations. Enable local Redis append-only persistence/noeviction and configure local-only Mailpit capture defaults. Eleven launcher/guard tests, targeted lint/types and ShellCheck passed. |
+
+## Version 0.6.0 follow-up
+
+The backend copied `public/` as root while preserving file modes. A checkout
+created under a private umask therefore yielded root-owned 0700 directories
+that the serving UID 1001 could not enumerate. Copy public assets with explicit
+`nextjs:nodejs` ownership; existing frontend copies already use that owner.
+The real CI installer creates only a new owned nested 0700/0600 probe, builds
+it into the image and runs Node as the default nonroot user to verify ownership,
+mode retention, directory enumeration and file contents. Its existing cleanup
+trap removes the probe even when a build fails; existing checkout permissions
+are never changed. A source-executed failure regression checks this lifecycle.
+
+The first PR 5 CI run passed application lint/types/units/integration and both
+browser layouts, then failed in the installer fixture because sudo-rs ignored
+`sudo -E` and dropped `SWI_CONFIG_DIR`. The fixture now passes only `CI`, the
+configuration directory and disposable project name through `sudo env`;
+credentials remain in private configuration files and unrelated environment
+secrets are not forwarded. The root-run native proof remains valid for its
+original scope; it did not exercise this nonroot CI handoff.
+
+Focused follow-up verification: **11 tests in two files passed**, focused
+ESLint, Bash syntax and ShellCheck passed. Separate disposable Linux execution
+of the actual harness confirms 0700/0700/0600 probe modes, cleanup after a
+build failure, unchanged existing asset contents/modes, and correct minimal
+environment handoff through an environment-clearing fake sudo. The final
+container assertion will verify UID 1001 can enumerate/read those packaged
+assets; it is not yet claimed as executed for 0.6.0.
+
+The earlier 0.5.1 image/source/restore evidence below remains historical. Final
+0.6.0 native images/recovery/scans and new-head CI remain pending before merge.
 
 ## Coverage and evidence
 
@@ -125,7 +158,7 @@ UI-tested image IDs, before the package-manager removal below:
 - Backend: `sha256:74d38959b749b019d34ecf32f79661bb057aee50a5b577909a99b17b9fb434b1`.
 - Frontend: `sha256:d3988e0fa283b858092bc20f76819d22e7681f788199f527a85ec3d293b97e5d`.
 
-Final image-security/installer-tested image IDs (same application/UI source):
+Historical 0.5.1 image-security/installer-tested image IDs:
 
 - Backend: `sha256:80d7634c48051b4df737e0fdb2ccb08c4bba177d96ddf00b319555b6e8133184`.
 - Frontend: `sha256:1204d5fd590f23f7cc71125b4da81840ad15cb4d0366e0d6e2a018a3b576dcf4`.
