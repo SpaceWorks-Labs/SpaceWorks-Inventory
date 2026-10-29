@@ -19,6 +19,28 @@ jobs:
       - run: npm run deployment:check
   application:
     uses: ./.github/workflows/ci.yml
+  cloudflare-cron:
+    name: Independent cron dependency and bundle check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Audit and dry-run the isolated cron package without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d)
+          trap 'rm -rf -- "$work"' EXIT
+          mkdir -p "$work/source" "$work/home" "$work/cache"
+          git archive HEAD deploy/cloudflare-cron | tar -xf - -C "$work/source"
+          cd "$work/source/deploy/cloudflare-cron"
+          rm -f -- .env .env.* .dev.vars .dev.vars.*
+          clean_env=(env -i "PATH=$PATH" "HOME=$work/home" "XDG_CONFIG_HOME=$work/home/config" "XDG_CACHE_HOME=$work/cache" CI=true WRANGLER_SEND_METRICS=false)
+          "${clean_env[@]}" npm ci --ignore-scripts --no-fund
+          "${clean_env[@]}" npm audit --audit-level=high --ignore-scripts
+          "${clean_env[@]}" npm run check
   container:
     name: Two-image installer smoke
     runs-on: ubuntu-latest

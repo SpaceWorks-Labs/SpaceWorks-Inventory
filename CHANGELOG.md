@@ -14,6 +14,7 @@ build is tagged `v<version>-main.<run>.<commit>`; see
 
 - Preserve public asset access for the nonroot backend when installation files use private directory and file modes.
 - Pass explicit nonsecret installer fixture coordinates through environment-clearing sudo implementations.
+- Update the independent Cloudflare cron tooling lockfile and audit its dependencies and credential-free bundle separately in CI.
 
 - Serialize borrower allowance and shared-container lending decisions and reject ineligible borrowers.
 - Block mapped IPv6 webhook targets and update Nodemailer for security fixes.

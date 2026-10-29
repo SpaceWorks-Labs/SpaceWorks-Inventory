@@ -77,6 +77,26 @@ assets; it is not yet claimed as executed for 0.6.0.
 The earlier 0.5.1 image/source/restore evidence below remains historical. Final
 0.6.0 native images/recovery/scans and new-head CI remain pending before merge.
 
+The independent `deploy/cloudflare-cron/package-lock.json` was also audited
+separately. The root audit does not include this auxiliary deployment package.
+Its initial audit reported **one high and two moderate** entries through
+undici 7.29.1 and its parent tooling. A compatible lockfile update resolves
+Wrangler 4.156.0, undici **7.30.1** and workerd 1.20261023.1; the exact workerd
+install-script allowlist pin follows that locked version without broadening it.
+The nested audit now reports **zero vulnerabilities**. The upstream
+[undici advisory](https://github.com/nodejs/undici/security/advisories/GHSA-xjj6-f33q-929c)
+identifies 7.30.1 as a fixed release. No application request path into Wrangler
+was identified; it is excluded from application builds.
+
+An actual Wrangler `deploy --dry-run` succeeded from a Git-visible-only copy
+with an explicit environment allowlist, private temporary HOME/profile/cache,
+metrics disabled and no inherited Cloudflare credentials. It bundled 2.10 KiB;
+no Worker was deployed. Evidence is under `inventory/v060/cron-audit/`. A separate
+quality job now installs this independent lockfile with scripts disabled,
+checks high-severity advisories and repeats the bundle dry-run with an empty
+profile. This result is separate from the root application's two moderate
+ExcelJS/UUID entries, which remain tracked.
+
 ## Coverage and evidence
 
 | Area | Reviewed paths / verification |
