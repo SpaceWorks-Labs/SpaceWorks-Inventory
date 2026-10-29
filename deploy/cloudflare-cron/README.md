@@ -19,6 +19,10 @@ this Worker.
 
 This folder is a separate package: it is excluded from the app's TypeScript,
 ESLint, Vitest and Docker build, and its only dependency is `wrangler`.
+The root dependency audit does not cover this lockfile. The quality workflow
+installs and audits it separately, then bundles it with `npm run check` in a
+Git-visible source copy with an empty user profile and metrics disabled.
+That check has no Cloudflare credentials and does not deploy the Worker.
 
 ## Deploy
 

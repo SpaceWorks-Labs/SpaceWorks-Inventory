@@ -1,5 +1,3 @@
-import { existsSync, rmSync } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
@@ -11,6 +9,8 @@ import { localStock, otherSpaces, sharedStock } from "@/lib/desk/transferOptions
 import { listTransfers, transferDetail } from "@/lib/desk/transfers";
 import { approveStep, cancelStep, dispatchStep, missingStep, receiveReturnStep, receiveStep, requestTransferStep, sendBackStep } from "@/lib/desk/transferSteps";
 import { cleanup, createSpace, seedSpace, uniqueSuffix } from "../helpers/fixtures";
+import { cleanupStoredObjects } from "../helpers/storedObjects";
+import { getObject } from "@/lib/storage";
 
 const suffix = uniqueSuffix();
 let a: Awaited<ReturnType<typeof seedSpace>>;
@@ -18,7 +18,6 @@ let b: { id: string; slug: string; timezone: string };
 let c: { id: string; slug: string; timezone: string };
 let bShelf: { id: string };
 const actor = { userId: null };
-const storageRoot = path.resolve(process.cwd(), ".data/storage");
 const stored = (spaceId: string) => prisma.evidencePhoto.findMany({ where: { evidence: { spaceId } }, select: { storageKey: true } });
 const ctx = (space: { id: string; timezone: string }, userId: string) => ({ space: { id: space.id, timezone: space.timezone }, userId });
 
@@ -41,7 +40,7 @@ beforeAll(async () => {
   bShelf = await prisma.location.create({ data: { spaceId: b.id, name: "Intake", code: "IN", kind: "SHELF", qrCode: newQrCode("location") } });
 });
 afterAll(async () => {
-  for (const space of [a?.space.id, b?.id, c?.id]) if (space) rmSync(path.join(storageRoot, "spaces", space), { recursive: true, force: true });
+  for (const space of [a?.space.id, b?.id, c?.id]) if (space) await cleanupStoredObjects(space);
   await cleanup([a.space.slug, b.slug, c.slug], a.domain);
 });
 
@@ -79,7 +78,7 @@ describe("transfer desk handovers", () => {
     await dispatchStep(ctx(a.space, a.staff.id), { transferId: transfer.id, quantities: { [line.id]: 4 }, scannedCodes: [wire.qrCode], carrier: "Van", trackingRef: null, expectedAt: "2026-11-02", remarks: "Boxed" }, [await photoFile()]);
     const keys = await stored(a.space.id);
     expect(keys).toHaveLength(1);
-    expect(existsSync(path.join(storageRoot, keys[0]!.storageKey))).toBe(true);
+    expect(await getObject(keys[0]!.storageKey)).not.toBeNull();
 
     // Each side sees its own view; the receiver doesn't learn the sender's shelf.
     const fromB = (await transferDetail(b.slug, b.id, transfer.id))!;

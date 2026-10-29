@@ -11,29 +11,78 @@ SWI_PROJECT_NAME="swi-smoke-$(date +%s)"
 export SWI_CONFIG_DIR SWI_PROJECT_NAME
 cleanup() {
   status=$?
+  docker rm -f "$SWI_PROJECT_NAME-mailpit" >/dev/null 2>&1 || true
   if [[ $status != 0 && -f "$SWI_CONFIG_DIR/compose.env" ]]; then
     # Only this disposable deployment; never dump interpolated configuration.
     as_root sh scripts/vps-compose.sh ps || true
     as_root sh scripts/vps-compose.sh logs --tail 40 app frontend worker beat || true
   fi
   [[ ! -f "$SWI_CONFIG_DIR/compose.env" ]] || as_root sh scripts/vps-compose.sh down --volumes --remove-orphans >/dev/null 2>&1 || true
+  [[ -z ${public_probe:-} ]] || rm -rf -- "$public_probe"
+  [[ -z ${scripts_probe:-} ]] || rm -f -- "$scripts_probe"
+  [[ -z ${vps_probe:-} ]] || rm -rf -- "$vps_probe"
   as_root rm -rf -- "$work"
 }
 trap cleanup EXIT
 # The real installer runs as root; config files are root-owned with mode 600.
-as_root() { if [[ $(id -u) = 0 ]]; then "$@"; else sudo -E "$@"; fi; }
+as_root() {
+  if [[ $(id -u) = 0 ]]; then
+    "$@"
+  else
+    # sudo-rs may ignore -E; only these nonsecret fixture coordinates are needed.
+    sudo env CI=true "SWI_CONFIG_DIR=$SWI_CONFIG_DIR" "SWI_PROJECT_NAME=$SWI_PROJECT_NAME" "$@"
+  fi
+}
 mkdir -m 700 "$SWI_CONFIG_DIR"
+# Only this new owned fixture is restrictive; existing checkout permissions stay intact.
+public_probe=$(mktemp -d "$root/public/audit-permissions.XXXXXX")
+mkdir -m 700 "$public_probe/nested"
+(umask 077; printf 'inventory-public-permission-fixture\n' > "$public_probe/nested/readable.txt")
+scripts_probe=$(mktemp "$root/scripts/audit-permissions.XXXXXX.mjs")
+vps_probe=$(mktemp -d "$root/docker/vps/audit-permissions.XXXXXX")
+(umask 077
+  printf 'export default "inventory-script-permission-fixture";\n' > "$scripts_probe"
+  printf 'export default "inventory-operator-permission-fixture";\n' > "$vps_probe/readable.mjs")
 export SWI_BUILD_KEY
 SWI_BUILD_KEY=$(openssl rand -base64 32)
 docker build --target runner --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid -t swi-backend:smoke .
+# The default serving user must retain access without relaxing the private modes.
+docker run --rm --network none --entrypoint node \
+  -e SWI_PUBLIC_PERMISSION_PROBE="${public_probe#"$root/"}" \
+  -e SWI_SCRIPT_PERMISSION_PROBE="${scripts_probe#"$root/"}" \
+  -e SWI_VPS_PERMISSION_PROBE="${vps_probe#"$root/"}/readable.mjs" swi-backend:smoke -e '
+const assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path");
+const probe = path.join("/app", process.env.SWI_PUBLIC_PERMISSION_PROBE);
+assert.equal(process.getuid(), 1001);
+for (const directory of [probe, path.join(probe, "nested")]) {
+  assert.equal(fs.statSync(directory).mode & 0o777, 0o700);
+  assert.equal(fs.statSync(directory).uid, 1001);
+  fs.readdirSync(directory);
+}
+const asset = path.join(probe, "nested/readable.txt");
+assert.equal(fs.statSync(asset).mode & 0o777, 0o600);
+assert.equal(fs.readFileSync(asset, "utf8"), "inventory-public-permission-fixture\n");
+for (const [name, expected] of [["SWI_SCRIPT_PERMISSION_PROBE", "script"], ["SWI_VPS_PERMISSION_PROBE", "operator"]]) {
+  const file = path.join("/app", process.env[name]);
+  assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+  assert.equal(fs.statSync(file).uid, 1001);
+  assert.equal(fs.readFileSync(file, "utf8"), `export default "inventory-${expected}-permission-fixture";\n`);
+}
+const operatorDirectory = path.dirname(path.join("/app", process.env.SWI_VPS_PERMISSION_PROBE));
+assert.equal(fs.statSync(operatorDirectory).mode & 0o777, 0o700);
+assert.equal(fs.statSync(operatorDirectory).uid, 1001);
+fs.readdirSync(operatorDirectory);
+console.log("Nonroot backend read private-mode public assets, scripts and operator directory.");
+'
 docker build --target frontend --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=SWI_BUILD_KEY \
   --build-arg NEXT_PUBLIC_BASE_URL=https://spaceworks-inventory-origin.invalid \
   --build-arg NEXT_PUBLIC_BACKEND_ORIGIN=https://spaceworks-inventory-backend.invalid -t swi-frontend:smoke .
 # Exercise the exact configuration writer the confirmed installer runs.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" swi-backend:smoke \
   node docker/vps/setup.mjs api.space.example.test owner@example.test smoke space.example.test split
-export EMAIL_FROM='Space Works Inventory <noreply@example.test>' SMTP_HOST=smtp.example.test SMTP_PORT=587 SMTP_SECURE=false SMTP_USER=smoke SMTP_PASSWORD=disposable-ci-smtp
+as_root bash scripts/test-postgres-bootstrap.sh
+export EMAIL_FROM='Space Works Inventory <noreply@example.test>' SMTP_HOST=mailpit SMTP_PORT=1025 SMTP_SECURE=false SMTP_USER=smoke SMTP_PASSWORD=disposable-ci-smtp
 # Credentials travel in environment, never arguments.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" \
   -e EMAIL_FROM -e SMTP_HOST -e SMTP_PORT -e SMTP_SECURE -e SMTP_USER -e SMTP_PASSWORD \
@@ -41,6 +90,7 @@ docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" \
 printf "SWI_CADDY_TLS='internal'\n" | as_root tee -a "$SWI_CONFIG_DIR/compose.env" >/dev/null
 as_root mkdir -m 755 "$SWI_CONFIG_DIR/status"
 as_root sh scripts/vps-compose.sh config --quiet
+as_root sh scripts/vps-compose.sh build proxy
 as_root sh scripts/vps-compose.sh up -d --wait --wait-timeout 300
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/check.mjs
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smoke.mjs
@@ -49,7 +99,17 @@ as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smok
 as_root bash -c '. scripts/vps-lib.sh
 conf_set "$1/compose.env" SWI_LAYOUT single
 conf_set "$1/compose.env" SWI_CADDYFILE Caddyfile
+conf_set "$1/compose.env" PUBLIC_HOST "$(conf_get "$1/compose.env" SITE_HOST)"
 conf_set "$1/app.env" DEPLOYMENT_MODE ""' _ "$SWI_CONFIG_DIR"
+# The single hostname must be the same origin that auth and generated links use.
+# shellcheck disable=SC2016 # expanded by the inner shell
+as_root bash -c '. scripts/vps-lib.sh
+origin="https://$(conf_get "$1/compose.env" PUBLIC_HOST)"
+[[ "$(conf_get "$1/compose.env" PUBLIC_ORIGIN)" = "$origin" ]]
+[[ "$(conf_get "$1/app.env" AUTH_URL)" = "$origin" ]]
+[[ "$(conf_get "$1/app.env" NEXT_PUBLIC_BASE_URL)" = "$origin" ]]' _ "$SWI_CONFIG_DIR"
 as_root sh scripts/vps-compose.sh up -d --wait --wait-timeout 300 --remove-orphans
 as_root sh scripts/vps-compose.sh run --rm --no-deps -T ops node docker/vps/smoke.mjs
 printf 'Two-image installer smoke passed in split and single layouts.\n'
+as_root bash scripts/test-vps-jobs.sh
+as_root bash scripts/test-vps-recovery.sh

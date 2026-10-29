@@ -53,7 +53,9 @@ export function Field({ label, optional, helperText, error, hideLabel, className
   // attributes after hydration, so the label would point nowhere. Re-wire it.
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const control = box.current?.querySelector<HTMLElement>("input, select, textarea, [role=combobox]");
+    // Dropdown keeps an aria-hidden native select before its visible trigger.
+    // Giving that select the trigger's id would duplicate it and steal the label.
+    const control = box.current?.querySelector<HTMLElement>("input:not([aria-hidden=true]), select:not([aria-hidden=true]), textarea:not([aria-hidden=true]), [role=combobox]:not([aria-hidden=true])");
     if (!control || control.id) return;
     control.id = controlId;
     if (describedBy && !control.getAttribute("aria-describedby")) control.setAttribute("aria-describedby", describedBy);

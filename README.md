@@ -156,10 +156,12 @@ hostnames, one container on one hostname, or the website on Netlify), hostnames,
 HTTPS, storage (bundled Silo or an external S3/R2 bucket), SMTP, backups and automatic deploys. One
 summary lists every choice and **nothing changes until you confirm it**. Then it installs Docker if
 needed, generates every secret without printing it, downloads the release's ready-made images from
-[GitHub Packages](docs/CONTAINER_IMAGES.md), migrates and checks each service. Nothing is compiled on
-your server.
+[GitHub Packages](docs/CONTAINER_IMAGES.md), migrates and checks each service. The application images
+are prebuilt; setup builds the bundled HTTPS edge from pinned Caddy sources and security updates.
+An installation behind its own reverse proxy skips that build.
 
-**Before you start:** 2 vCPU, 2 GB RAM and 30 GB disk, DNS records for your hostnames, inbound ports
+**Before you start:** 2 vCPU, 4 GB RAM with swap available and 30 GB disk for the bundled edge,
+DNS records for your hostnames, inbound ports
 80 and 443, an SMTP relay on a verified sending domain, and your admin email. Phone cameras need HTTPS
 to scan QR codes.
 
@@ -241,18 +243,25 @@ You need Node.js 22 and Docker (the development Compose file provides PostgreSQL
 Mailpit).
 
 ```bash
-npm ci
-cp .env.example .env
-docker compose up -d
-npm run db:deploy
-DEMO_PASSWORD='choose-12-or-more-characters' npm run db:seed:demo
-npm run dev
+./local.sh start
 ```
 
-Open http://localhost:3000 and sign in as `anjali@tinkerspace.test` or `meera@tinkerspace.test`
-(inventory managers), `joel@tinkerspace.test` (staff) or `fathima@tinkerspace.test` (member) with your
-demo password. To try the first-run wizard instead, skip the seed and open `/setup`. Without SMTP,
-development emails (magic links, invitations) are written to `.data/mail/`.
+The helper generates local secrets, initializes the private Silo bucket, applies migrations, then
+supervises the web app, BullMQ worker and beat. Open http://localhost:3000/setup to create your first
+account and space. Email stays in local Mailpit at http://127.0.0.1:8025; Redis persists jobs with
+append-only storage and refuses eviction. Ctrl+C stops all three Node processes; `./local.sh stop`
+also stops the Docker services while keeping their data.
+
+For Windows or manual startup: run `npm ci`, copy `.env.example` to `.env` and fill its empty auth
+and encryption keys, then run `docker compose up -d --wait`, `npm run storage:init`,
+`npm run db:deploy` and `npm run dev:stack`. The worker and beat health endpoints use separate
+loopback ports 3460 and 3461 (overrides: `SWI_DEV_WORKER_PORT`, `SWI_DEV_BEAT_PORT`).
+For demo accounts, stop the stack and run `DEMO_PASSWORD='choose-12-or-more-characters' npm run
+db:seed:demo`, then restart it. Inventory managers: `anjali@tinkerspace.test` or
+`meera@tinkerspace.test`; staff: `joel@tinkerspace.test`; member: `fathima@tinkerspace.test`.
+`npm run dev` runs the web process alone for focused frontend work; background processing requires
+`dev:stack` or separately running worker and beat. Existing `.env` files are preserved: point SMTP
+at local Mailpit explicitly if they predate these defaults. Admin email settings override the env.
 
 ## Design system
 
@@ -300,7 +309,8 @@ How this app applies the brand is in [docs/DESIGN.md](docs/DESIGN.md). Rebuild t
 ## Common commands
 
 ```bash
-npm run dev                  # development server
+npm run dev:stack            # web + BullMQ worker + beat (after local services setup)
+npm run dev                  # web process only
 npm run lint                 # ESLint (with the 300-line limit)
 npm run typecheck            # TypeScript
 npm run test:unit            # unit tests

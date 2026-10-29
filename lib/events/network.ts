@@ -12,11 +12,23 @@ export function isPrivateAddress(address: string): boolean {
     return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 198 && (b === 18 || b === 19)) || a >= 224;
   }
   if (version === 6) {
-    const lower = address.toLowerCase();
-    if (lower === "::" || lower === "::1") return true;
-    const mapped = lower.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-    if (mapped) return isPrivateAddress(mapped[1]!);
-    return /^(fc|fd|fe8|fe9|fea|feb|ff)/.test(lower);
+    // URL canonicalization also converts dotted IPv4 tails to hexadecimal.
+    // Expand before classifying so alternate spellings cannot hide loopback,
+    // mapped IPv4, unique-local or link-local addresses from the check.
+    const canonical = new URL(`http://[${address}]/`).hostname.slice(1, -1);
+    const halves = canonical.split("::");
+    const left = halves[0] ? halves[0].split(":") : [];
+    const right = halves[1] ? halves[1].split(":") : [];
+    const words = [...left, ...Array(8 - left.length - right.length).fill("0"), ...right].map((word) => parseInt(word, 16));
+    if (words.slice(0, 5).every((word) => word === 0) && words[5] === 0xffff) {
+      return isPrivateAddress(`${words[6]! >>> 8}.${words[6]! & 255}.${words[7]! >>> 8}.${words[7]! & 255}`);
+    }
+    // Only global unicast is routable for outbound webhooks. This excludes
+    // unspecified/loopback, local scopes and translation-only address ranges.
+    if ((words[0]! & 0xe000) !== 0x2000) return true;
+    // 6to4 embeds the destination IPv4 in its next two words.
+    if (words[0] === 0x2002) return isPrivateAddress(`${words[1]! >>> 8}.${words[1]! & 255}.${words[2]! >>> 8}.${words[2]! & 255}`);
+    return false;
   }
   return true;
 }

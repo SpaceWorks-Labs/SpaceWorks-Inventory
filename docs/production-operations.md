@@ -80,7 +80,11 @@ connection. Archives and their checksum metadata stay in the ignored
 `npm run db:restore` takes `--file <archive>` (or `--s3-key`), `--production`
 and `--confirm-database <name>`, and takes a safety backup first. Photos live
 in the bucket: copy it with your provider's tools. Do not put secrets in
-support tickets or shell history.
+support tickets or shell history. The CLI supports the application public
+schema only and refuses archives or targets with other user schemas. It stages
+the entire archive before one atomic schema replacement, removes tables absent
+from the backup, and retains its `--no-owner --no-privileges` policy; the
+restoring database user owns recovered objects.
 
 ## Background work
 
