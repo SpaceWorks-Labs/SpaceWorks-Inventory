@@ -61,6 +61,7 @@ docker build --target frontend --secret id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,en
 # Exercise the exact configuration writer the confirmed installer runs.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" swi-backend:smoke \
   node docker/vps/setup.mjs api.space.example.test owner@example.test smoke space.example.test split
+as_root bash scripts/test-postgres-bootstrap.sh
 export EMAIL_FROM='Space Works Inventory <noreply@example.test>' SMTP_HOST=mailpit SMTP_PORT=1025 SMTP_SECURE=false SMTP_USER=smoke SMTP_PASSWORD=disposable-ci-smtp
 # Credentials travel in environment, never arguments.
 docker run --rm --user 0:0 -v "$SWI_CONFIG_DIR:/config" \

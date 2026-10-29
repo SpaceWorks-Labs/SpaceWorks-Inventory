@@ -97,6 +97,20 @@ checks high-severity advisories and repeats the bundle dry-run with an empty
 profile. This result is separate from the root application's two moderate
 ExcelJS/UUID entries, which remain tracked.
 
+Private PostgreSQL HBA/init inputs are now staged from read-only bootstrap
+mounts into postgres-owned runtime files before the official entrypoint drops
+privileges. A real PostgreSQL 16 probe passed with source modes 0600/0700,
+TLS enabled, `swi_app` initialized and nonroot read/execute/mode assertions.
+The exact installer now runs this isolated probe without changing existing
+checkout permissions. Evidence: `inventory/v060/bootstrap-acceptance/probe.log`.
+
+Encrypted backup packaging precreates its excluded output before GNU tar reads
+directory metadata. A deterministic checkpoint regression reproduces the prior
+`file changed as we read it` failure and passes with the actual precreation
+step. The actual age pipeline also passed checkpoint injection, decryption and
+byte comparison (`inventory/v060/backup-encrypted-race-proof.log`). Tar errors
+remain fatal. The final 0.6.0 full clean-stack drill remains pending below.
+
 ## Coverage and evidence
 
 | Area | Reviewed paths / verification |
